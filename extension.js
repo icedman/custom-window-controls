@@ -28,6 +28,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 const { schemaId, settingsKeys, SettingsKeys } = Me.imports.preferences.keys;
 
 const KeyboardShortcuts = Me.imports.keybinding.KeyboardShortcuts;
+const Hook = Me.imports.hook.Hook;
 
 const runSequence = Me.imports.utils.runSequence;
 const runOneShot = Me.imports.utils.runOneShot;
@@ -80,11 +81,13 @@ class Extension {
   }
 
   disable() {
+    clearAllTimers();
+
     SettingsKeys.disconnectSettings();
     this._settings = null;
 
     this._removeEvents();
-    clearAllTimers();
+    this._releaseWindows();
   }
 
   _addEvents() {
@@ -100,17 +103,9 @@ class Extension {
       this
     );
 
-    global.stage.connectObject(
-      'notify::key-focus',
-      this._onKeyFocusChanged.bind(this),
-      this
-    );
-
     global.display.connectObject(
       'notify::focus-window',
       this._onFocusWindow.bind(this),
-      'in-fullscreen-changed',
-      this._onFullScreen.bind(this),
       this
     );
   }
@@ -120,11 +115,9 @@ class Extension {
     global.display.disconnectObject(this);
   }
 
-  _onFocusWindow(w, e) {}
-
-  _onKeyFocusChanged() {}
-
-  _onFullScreen() {}
+  _onFocusWindow(w, e) {
+    // hook!
+  }
 
   _findWindows() {
     let actors = global.get_window_actors();
@@ -138,8 +131,33 @@ class Extension {
     return windows;
   }
 
+  _findHookedWindows() {
+    let hooked = this._findWindows();
+    hooked.filter((w) => {
+      return w._hook != null;
+    });
+    return hooked;
+  }
+
   _hookWindows() {
     this._windows = this._findWindows();
+    this._windows.forEach((w) => {
+      if (!w._hook) {
+        w._hook = new Hook();
+        w._hook.attach(w);
+      }
+    });
+  }
+
+  _releaseWindows() {
+    this._windows = this._findWindows();
+    this._windows.forEach((w) => {
+      if (w._hook) {
+        w._hook.release();
+        w._hook = null;
+        delete w._hook;
+      }
+    });
   }
 }
 
