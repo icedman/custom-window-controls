@@ -20,7 +20,7 @@
 
 const GETTEXT_DOMAIN = 'custom-window-controls';
 
-const { GObject, St, Meta } = imports.gi;
+const { GObject, St, Meta, Clutter } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Main = imports.ui.main;
@@ -108,6 +108,12 @@ class Extension {
       this._onFocusWindow.bind(this),
       this
     );
+
+    // global.stage.connectObject(
+    //   'captured-event',
+    //   this._handleEvent.bind(this),
+    //   this
+    // );
   }
 
   _removeEvents() {
@@ -116,7 +122,7 @@ class Extension {
   }
 
   _onFocusWindow(w, e) {
-    // hook!
+    this._hookWindows();
   }
 
   _findWindows() {
@@ -159,6 +165,14 @@ class Extension {
       }
     });
   }
+
+  // _handleEvent(actor, event) {
+  //   if (event.type() == Clutter.EventType.BUTTON_PRESS ||
+  //       event.type() == Clutter.EventType.TOUCH_BEGIN) {
+  //       log(`${event.type()}`);
+  //   }
+  //   return Clutter.EVENT_PROPAGATE;
+  // }
 }
 
 function init(meta) {

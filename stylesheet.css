@@ -1,51 +1,35 @@
-#searchLightContainer {
-  padding: 20px;
-  border-radius: 16px;
-  /*border: 1px solid #3c3c3c;*/
-  border: 0px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  /*background: rgba(20, 20, 20, 0.95);*/
+#cwc-container {
+  background: rgba(255,0,255,1);
+}
+#cwc-container:hover {
+  /*border: 2px solid yellow;*/
 }
 
-#searchLightContainer > StEntry:focus,
-#searchLightContainer > StEntry {
-	margin-top: 0px !important;
-  margin-bottom: 20px !important;
-	border-radius: 8px;
-  border: 0px !important;
-  border-width: 0px !important;
-  background: rgba(0,0,0,0);
-  font-size: 18pt;
+#cwc-btn-0,
+#cwc-btn-1,
+#cwc-btn-2 {
+  border-radius: 8px;
 }
 
-#searchLightContainer.border-radius-0 {
-  border-radius: 0px !important;
+#cwc-btn-0 {
+  border: 2px solid rgba(255,0,0,1.0);
+  background: rgba(220,0,0,0.8);
+}
+#cwc-btn-1 {
+  border: 2px solid rgba(255,255,0,1.0);
+  background: rgba(255,255,0,0.8);
+}
+#cwc-btn-2 {
+  border: 2px solid rgba(0,255,0,1.0);
+  background: rgba(0,255,0,0.8);
 }
 
-#searchLightContainer.border-radius-1 > StWidget.dash-background {
-  border-radius: 8px !important;
+#cwc-btn-0:hover {
+  background: rgba(255,0,0,1.0);
 }
-
-#searchLightContainer.border-radius-2 > StWidget.dash-background {
-  border-radius: 16px !important;
+#cwc-btn-1:hover {
+  background: rgba(255,255,0,1.0);
 }
-
-#searchLightContainer.border-radius-3 > StWidget.dash-background {
-  border-radius: 20px !important;
-}
-
-#searchLightContainer.border-radius-4 > StWidget.dash-background {
-  border-radius: 24px !important;
-}
-
-#searchLightContainer.border-radius-5 > StWidget.dash-background {
-  border-radius: 28px !important;
-}
-
-#searchLightContainer.border-radius-6 > StWidget.dash-background {
-  border-radius: 32px !important;
-}
-
-#searchLightContainer.border-radius-7 > StWidget.dash-background {
-  border-radius: 48px !important;
+#cwc-btn-2:hover {
+  background: rgba(0,255,0,1.0);
 }
