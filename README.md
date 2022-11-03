@@ -1,1 +1,4 @@
-# custom-window-controls
+```sh
+git clone http://github.com/icedman/custom-window-controls
+make
+```
