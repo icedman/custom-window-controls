@@ -15,9 +15,9 @@ void main() {
     vec4 cc = texture2D(tex, vec2(x1, coord.y));
     if (coord.x >= x1 && coord.y >= y1 &&
         coord.x <= x2 && coord.y <= y2 &&
-        c.r == c.b && c.r - c.g > 0.5
+        c.r > 0.6 && c.b > 0.6 && c.r - c.g > 0.4
         ) {
-        cogl_color_out = vec4(cc.r, cc.g, cc.b, 1.0);
+        cogl_color_out = vec4(cc.r, cc.g, cc.b, c.a);
     } else {
         cogl_color_out = vec4(c.r, c.g, c.b, c.a);
     }

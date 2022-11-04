@@ -1,35 +1,10 @@
+/*
+shader convert magenta to titlebar background
+this covers existing buttons
+*/
 #cwc-container {
   background: rgba(255,0,255,1);
 }
 #cwc-container:hover {
   /*border: 2px solid yellow;*/
-}
-
-#cwc-btn-0,
-#cwc-btn-1,
-#cwc-btn-2 {
-  border-radius: 8px;
-}
-
-#cwc-btn-0 {
-  border: 2px solid rgba(255,0,0,1.0);
-  background: rgba(220,0,0,0.8);
-}
-#cwc-btn-1 {
-  border: 2px solid rgba(255,255,0,1.0);
-  background: rgba(255,255,0,0.8);
-}
-#cwc-btn-2 {
-  border: 2px solid rgba(0,255,0,1.0);
-  background: rgba(0,255,0,0.8);
-}
-
-#cwc-btn-0:hover {
-  background: rgba(255,0,0,1.0);
-}
-#cwc-btn-1:hover {
-  background: rgba(255,255,0,1.0);
-}
-#cwc-btn-2:hover {
-  background: rgba(0,255,0,1.0);
 }

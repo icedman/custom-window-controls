@@ -20,14 +20,13 @@
 
 const GETTEXT_DOMAIN = 'custom-window-controls';
 
-const { GObject, St, Meta, Clutter } = imports.gi;
+const { GObject, St, Meta, Clutter, Gio } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Main = imports.ui.main;
 const Me = ExtensionUtils.getCurrentExtension();
 const { schemaId, settingsKeys, SettingsKeys } = Me.imports.preferences.keys;
 
-const KeyboardShortcuts = Me.imports.keybinding.KeyboardShortcuts;
 const Hook = Me.imports.hook.Hook;
 
 const runSequence = Me.imports.utils.runSequence;
@@ -54,12 +53,20 @@ const handledWindowTypes = [
 class Extension {
   constructor(uuid) {
     this._uuid = uuid;
-
     ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
   }
 
   enable() {
     Main._customWindowControls = this;
+
+    this._gsettings = new Gio.Settings({
+      schema_id: 'org.gnome.desktop.wm.preferences',
+    });
+    this._layout = this._gsettings.get_string('button-layout');
+    this._gsettings.set_string(
+      'button-layout',
+      'close,minimize,maximize:appmenu'
+    );
 
     this._settings = ExtensionUtils.getSettings(schemaId);
     this._settingsKeys = SettingsKeys;
@@ -83,6 +90,9 @@ class Extension {
   disable() {
     clearAllTimers();
 
+    this._gsettings.set_string('button-layout', this._layout || '');
+    this._gsettings = null;
+
     SettingsKeys.disconnectSettings();
     this._settings = null;
 
@@ -104,8 +114,18 @@ class Extension {
     );
 
     global.display.connectObject(
-      'notify::focus-window',
-      this._onFocusWindow.bind(this),
+      'closing',
+      () => {
+        this._releaseWindows();
+      },
+      'window-created',
+      () => {
+        this._hookWindows();
+      },
+      // 'notify::focus-window',
+      // () => {
+      //   this._hookWindows();
+      // },
       this
     );
 
@@ -114,15 +134,25 @@ class Extension {
     //   this._handleEvent.bind(this),
     //   this
     // );
+    Main.overview.connectObject(
+      'showing',
+      () => {
+        this._setActiveHooks(false);
+      },
+      this
+    );
+    Main.overview.connectObject(
+      'hidden',
+      () => {
+        this._setActiveHooks(true);
+      },
+      this
+    );
   }
 
   _removeEvents() {
     global.stage.disconnectObject(this);
     global.display.disconnectObject(this);
-  }
-
-  _onFocusWindow(w, e) {
-    this._hookWindows();
   }
 
   _findWindows() {
@@ -143,6 +173,13 @@ class Extension {
       return w._hook != null;
     });
     return hooked;
+  }
+
+  _setActiveHooks(t) {
+    let windows = this._findHookedWindows();
+    windows.forEach((w) => {
+      w._hook.setActive(t);
+    });
   }
 
   _hookWindows() {
