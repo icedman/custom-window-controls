@@ -17,6 +17,9 @@ void main() {
         coord.x <= x2 && coord.y <= y2 &&
         c.r > 0.6 && c.b > 0.6 && c.r - c.g > 0.4
         ) {
+        if (cc.r == 0 && cc.g == 0 && cc.b == 0) {
+            c.a = 0;
+        }
         cogl_color_out = vec4(cc.r, cc.g, cc.b, c.a);
     } else {
         cogl_color_out = vec4(c.r, c.g, c.b, c.a);

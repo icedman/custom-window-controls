@@ -35,6 +35,7 @@ const runLoop = Me.imports.utils.runLoop;
 const beginTimer = Me.imports.utils.beginTimer;
 const clearAllTimers = Me.imports.utils.clearAllTimers;
 const getRunningTimers = Me.imports.utils.getRunningTimers;
+const ApplicationsService = Me.imports.dbus.services.ApplicationsService;
 
 const _ = ExtensionUtils.gettext;
 
@@ -58,6 +59,9 @@ class Extension {
 
   enable() {
     Main._customWindowControls = this;
+
+    this.dbus = new ApplicationsService();
+    this.dbus.export();
 
     this._gsettings = new Gio.Settings({
       schema_id: 'org.gnome.desktop.wm.preferences',
@@ -90,6 +94,9 @@ class Extension {
   disable() {
     clearAllTimers();
 
+    this.dbus.export();
+    this.dbus = null;
+
     this._gsettings.set_string('button-layout', this._layout || '');
     this._gsettings = null;
 
@@ -119,8 +126,15 @@ class Extension {
         this._releaseWindows();
       },
       'window-created',
-      () => {
-        this._hookWindows();
+      (display, win) => {
+        if (win && !win.get_wm_class_instance()) {
+          const notify_id = win.connect('notify::wm-class', () => {
+            this._hookWindows();
+            win.disconnect(notify_id);
+          });
+        } else {
+          this._hookWindows();
+        }
       },
       // 'notify::focus-window',
       // () => {

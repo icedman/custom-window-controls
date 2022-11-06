@@ -7,12 +7,20 @@ const ColorEffect = Me.imports.effects.color_effect.ColorEffect;
 const Button = Me.imports.button.Button;
 const CreateButtonIcon = Me.imports.button.CreateButtonIcon;
 
+const runSequence = Me.imports.utils.runSequence;
+const runOneShot = Me.imports.utils.runOneShot;
+const runLoop = Me.imports.utils.runLoop;
+const beginTimer = Me.imports.utils.beginTimer;
+const clearAllTimers = Me.imports.utils.clearAllTimers;
+const getRunningTimers = Me.imports.utils.getRunningTimers;
+
 const BTN_COUNT = 3;
 
 var Hook = class {
   attach(window) {
     // exclude?
     let wm = window.get_wm_class_instance();
+    if (wm == '') return;
     if (['google-chrome'].includes(wm)) {
       return;
     }
@@ -48,12 +56,22 @@ var Hook = class {
       y2: 0.5,
     });
 
+    this._deferredShow = true;
+    this._container.visible = false;
+
     window._parent.add_effect_with_name('cwc-color', this._effect);
     window._parent.get_texture().connect('size-changed', () => {
       this._reposition();
     });
 
     this._reposition();
+
+    beginTimer(
+      runOneShot(() => {
+        this._deferredShow = false;
+        this._reposition();
+      }, 0.16)
+    );
   }
 
   release() {
@@ -69,9 +87,11 @@ var Hook = class {
   }
 
   setActive(t) {
-    this._container.style = t ? '' : 'background: rgba(255,255,255,0)';
-    // this._container.visible = t;
-    this._effect.enabled = t;
+    if (this._container) {
+      this._container.style = t ? '' : 'background: rgba(255,255,255,0)';
+      // this._container.visible = t;
+      this._effect.enabled = t;
+    }
   }
 
   _reposition() {
@@ -84,7 +104,7 @@ var Hook = class {
     let sx = frame_rect.x - buffer_rect.x;
     let sy = frame_rect.y - buffer_rect.y;
 
-    let offset = [4 * scale, 6 * scale];
+    let offset = [5 * scale, 6 * scale];
     let cw = 38 * BTN_COUNT * scale;
     let ch = 34 * scale;
 
@@ -98,7 +118,9 @@ var Hook = class {
     this._effect.x2 = (sx + cw * 2) / buffer_rect.width;
     this._effect.y2 = (sy + ch * 2) / buffer_rect.height;
 
-    this._container.visible = !this._window.is_fullscreen();
+    if (!this._deferredShow) {
+      this._container.visible = !this._window.is_fullscreen();
+    }
   }
 
   _onFocusWindow(w, e) {

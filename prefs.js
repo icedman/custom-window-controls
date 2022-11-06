@@ -4,6 +4,7 @@ const { Adw, Gdk, GLib, Gtk, GObject, Gio, Pango } = imports.gi;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const { SettingsKeys } = Me.imports.preferences.keys;
 const UIFolderPath = Me.dir.get_child('ui').get_path();
+const { pick, on_picking, on_picked } = Me.imports.dbus.client;
 
 const GETTEXT_DOMAIN = 'custom-window-controls';
 const Gettext = imports.gettext.domain('custom-window-controls');

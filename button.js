@@ -60,8 +60,8 @@ var Button = GObject.registerClass(
       ctx.translate(size / 2, size / 2);
 
       let clr = this.state.hovered
-        ? this.state.color
-        : this.state.color_hovered;
+        ? this.state.color_hovered
+        : this.state.color;
 
       Drawing.draw_circle(ctx, clr, 0, 0, size, false);
 
@@ -73,22 +73,34 @@ var Button = GObject.registerClass(
   }
 );
 
+// FF574F
+// C19A32
+// 2AD043
 var CreateButtonIcon = (idx, sz, sx, sy, container, onClick) => {
   let styles = [
     {
-      color: [1, 0, 0, 1],
-      color_hovered: [0.8, 0, 0, 1],
+      color: [255 / 255, 87 / 255, 79 / 255, 1],
+      color_hovered: [255 / 255, (87 / 255) * 0.5, (79 / 255) * 0.5, 1],
     },
     {
-      color: [1, 1, 0, 1],
-      color_hovered: [0.8, 0.8, 0, 1],
+      color: [193 / 255, 154 / 255, 50 / 255, 1],
+      color_hovered: [193 / 255, 154 / 255, (50 / 255) * 0.5, 1],
     },
     {
-      color: [0, 1, 0, 1],
-      color_hovered: [0, 0.8, 0, 1],
+      color: [42 / 255, 208 / 255, 67 / 255, 1],
+      color_hovered: [(42 / 255) * 0.5, 208 / 255, (67 / 255) * 0.5, 1],
     },
   ];
-
+  styles.forEach((s) => {
+    s.color_hovered[0] *= 1.2;
+    s.color_hovered[1] *= 1.2;
+    s.color_hovered[2] *= 1.2;
+    for (let i = 0; i < 3; i++) {
+      if (s.color_hovered[i] > 255) {
+        s.color_hovered[i] = 255;
+      }
+    }
+  });
   let btn = new St.Button({ name: `cwc-btn-${idx}` });
   container.add_child(btn);
 
