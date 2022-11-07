@@ -180,14 +180,24 @@ var Hook = class {
     let ch = 34 * scale;
 
     sx += offset[0];
+    this._effect.x1 = sx / buffer_rect.width;
+    this._effect.x2 = (sx + cw * 2) / buffer_rect.width;
+
+    // if right layout
+    // sx += buffer_rect.width;
+    // sx -= offset[0];
+    // sx -= (cw * 2);
+    // this._effect.x1 = sx / 2 / buffer_rect.width;
+    // this._effect.x2 = 1.0; // (sx + cw * 2) / buffer_rect.width;
+
     sy += offset[1];
+    this._effect.y1 = sy / buffer_rect.height;
+    this._effect.y2 = (sy + ch * 2) / buffer_rect.height;
+
+    // this._effect.focused = this._window.has_focus() ? 0.0 : 0.5;
+
     this._container.set_position(sx, sy);
     this._container.set_size(cw, ch);
-
-    this._effect.x1 = sx / buffer_rect.width;
-    this._effect.y1 = sy / buffer_rect.height;
-    this._effect.x2 = (sx + cw * 2) / buffer_rect.width;
-    this._effect.y2 = (sy + ch * 2) / buffer_rect.height;
 
     if (!this._deferredShow) {
       this._container.visible = !this._window.is_fullscreen();

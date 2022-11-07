@@ -70,6 +70,7 @@ class Extension {
     this._gsettings.set_string(
       'button-layout',
       'close,minimize,maximize:appmenu'
+      // 'appmenu:maximize,minimize,close' // if right layout
     );
 
     this._settings = ExtensionUtils.getSettings(schemaId);

@@ -107,6 +107,15 @@ var ColorEffect = new GObject.registerClass(
         1.0,
         0.4
       ),
+      focused: GObject.ParamSpec.double(
+        `focused`,
+        `focused`,
+        `focused`,
+        GObject.ParamFlags.READWRITE,
+        0.0,
+        1.0,
+        0.4
+      ),
     },
   },
   class ColorShader extends Clutter.ShaderEffect {
@@ -119,6 +128,7 @@ var ColorEffect = new GObject.registerClass(
       this._x2 = null;
       this._y1 = null;
       this._y2 = null;
+      this._focused = null;
 
       this._static = true;
 
@@ -142,6 +152,7 @@ var ColorEffect = new GObject.registerClass(
       this.y1 = params._y1 || 0.0;
       this.x2 = params._x2 || 0.0;
       this.y2 = params._y2 || 0.0;
+      this.focused = params._focused || 0.0;
 
       this.update_enabled();
     }
@@ -260,6 +271,19 @@ var ColorEffect = new GObject.registerClass(
         this._y2 = value;
 
         this.set_uniform_value('y2', parseFloat(this._y2 - 1e-6));
+      }
+      this.update_enabled();
+    }
+
+    get focused() {
+      return this._focused;
+    }
+
+    set focused(value) {
+      if (this._focused !== value) {
+        this._focused = value;
+
+        this.set_uniform_value('focused', parseFloat(this._focused - 1e-6));
       }
       this.update_enabled();
     }
