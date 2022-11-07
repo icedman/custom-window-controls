@@ -66,8 +66,12 @@ var ApplicationsService = class ApplicationsService {
       if (!actor.toString().includes('WindowActor'))
         return send_picked_signal('window-not-found');
 
+      let wm_class_instance = actor.meta_window.get_wm_class_instance();
+      let wm_class = actor.meta_window.get_wm_class();
       send_picked_signal(
-        actor.meta_window.get_wm_class() ?? 'window-not-found'
+        wm_class_instance || wm_class
+          ? `${wm_class_instance}::${wm_class}`
+          : 'window-not-found'
       );
     });
 

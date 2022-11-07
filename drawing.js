@@ -52,22 +52,32 @@ const _drawing = class {
     ctx.moveTo(border_radius, 0);
     ctx.lineTo(h_size - border_radius, 0);
     // ctx.lineTo(h_size, border_radius);
-    ctx.curveTo(h_size - border_radius, 0, h_size, 0, h_size, border_radius);
+
+    if (border_radius > 0)
+      ctx.curveTo(h_size - border_radius, 0, h_size, 0, h_size, border_radius);
+
     ctx.lineTo(h_size, v_size - border_radius);
     // ctx.lineTo(h_size - border_radius, h_size);
-    ctx.curveTo(
-      h_size,
-      v_size - border_radius,
-      h_size,
-      v_size,
-      h_size - border_radius,
-      v_size
-    );
+
+    if (border_radius > 0)
+      ctx.curveTo(
+        h_size,
+        v_size - border_radius,
+        h_size,
+        v_size,
+        h_size - border_radius,
+        v_size
+      );
     ctx.lineTo(border_radius, v_size);
     // ctx.lineTo(0, h_size - border_radius);
-    ctx.curveTo(border_radius, v_size, 0, v_size, 0, v_size - border_radius);
+
+    if (border_radius > 0)
+      ctx.curveTo(border_radius, v_size, 0, v_size, 0, v_size - border_radius);
     ctx.lineTo(0, border_radius);
-    ctx.curveTo(0, border_radius, 0, 0, border_radius, 0);
+
+    if (border_radius > 0)
+      ctx.curveTo(0, border_radius, 0, 0, border_radius, 0);
+
     ctx.fill();
     ctx.restore();
   }

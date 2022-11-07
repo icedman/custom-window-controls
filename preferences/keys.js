@@ -8,20 +8,25 @@ var schemaId = 'org.gnome.shell.extensions.custom-window-controls';
 
 var SettingsKeys = new PrefKeys();
 SettingsKeys.setKeys({
-  'border-radius': {
+  'window-list': {
+    default_value: '',
+    widget_type: 'json_array',
+  },
+  'control-button-style': {
     default_value: 0,
-    widget_type: 'scale',
+    widget_type: 'dropdown',
+    options: [
+      'circle',
+      'square',
+      'dash',
+      'diamond',
+      'vertical',
+      'slash',
+      'back_slash',
+    ],
   },
-  'scale-width': {
-    default_value: 0.2,
-    widget_type: 'scale',
-  },
-  'scale-height': {
-    default_value: 0.2,
-    widget_type: 'scale',
-  },
-  'background-color': {
-    default_value: [0, 0, 0, 0.5],
+  'accent-color': {
+    default_value: [0, 0, 0, 1],
     widget_type: 'color',
   },
 });

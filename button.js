@@ -21,10 +21,11 @@ var Button = GObject.registerClass(
       this.state = {
         color: [0.8, 0.0, 0.0, 1.0],
         color_hovered: [1.0, 0.0, 0.0, 1.0],
+        type: 'circle',
       };
 
       this._canvas = new Clutter.Canvas();
-      this._canvas.connect('draw', this.on_draw.bind(this));
+      this._canvas.connect('draw', this._on_draw.bind(this));
       this._canvas.invalidate();
       this._canvas.set_size(size, size);
       this.set_size(size, size);
@@ -37,7 +38,7 @@ var Button = GObject.registerClass(
     }
 
     set_state(s) {
-      this.state = s;
+      this.state = { ...this.state, ...s };
       this.redraw();
     }
 
@@ -48,7 +49,7 @@ var Button = GObject.registerClass(
       });
     }
 
-    on_draw(canvas, ctx, width, height) {
+    _on_draw(canvas, ctx, width, height) {
       ctx.setOperator(Cairo.Operator.CLEAR);
       ctx.paint();
 
@@ -57,16 +58,97 @@ var Button = GObject.registerClass(
       ctx.setOperator(Cairo.Operator.SOURCE);
 
       ctx.save();
-      ctx.translate(size / 2, size / 2);
+      ctx.translate(width / 2, height / 2);
 
+      this.on_draw(ctx, width, height);
+
+      ctx.restore();
+      ctx.$dispose();
+    }
+
+    on_draw(ctx, width, height) {
+      var types = [
+        this._draw_circle_button,
+        this._draw_square_button,
+        this._draw_dash_button,
+        this._draw_diamond_button,
+        this._draw_vertical_button,
+        this._draw_slash_button,
+        this._draw_back_slash_button,
+      ];
+      var _f;
+      if (typeof this.state.type == 'string') {
+        _f = this[`_draw_${this.state.type}_button`];
+      } else {
+        _f = types[this.state.type];
+      }
+      _f = _f ?? this._draw_circle_button;
+      var func = _f.bind(this);
+      func(ctx, width, height);
+    }
+
+    _draw_vertical_button(ctx, width, height) {
+      ctx.rotate(90 * (Math.PI / 180));
+      this._draw_dash_button(ctx, width, height);
+    }
+
+    _draw_crystal_button(ctx, width, height) {
+      ctx.rotate(-45 * (Math.PI / 180));
+      this.__draw_square_button(ctx, width * 1.4, height / 2, 0);
+    }
+
+    _draw_back_crystal_button(ctx, width, height) {
+      ctx.rotate(45 * (Math.PI / 180));
+      this.__draw_square_button(ctx, width * 1.4, height / 2, 0);
+    }
+
+    _draw_slash_button(ctx, width, height) {
+      ctx.rotate(-45 * (Math.PI / 180));
+      this._draw_dash_button(ctx, width * 0.88, height);
+    }
+
+    _draw_back_slash_button(ctx, width, height) {
+      ctx.rotate(45 * (Math.PI / 180));
+      this._draw_dash_button(ctx, width * 0.88, height);
+    }
+
+    _draw_circle_button(ctx, width, height) {
       let clr = this.state.hovered
         ? this.state.color_hovered
         : this.state.color;
 
-      Drawing.draw_circle(ctx, clr, 0, 0, size, false);
+      Drawing.draw_circle(ctx, clr, 0, 0, width, false);
+    }
 
-      ctx.restore();
-      ctx.$dispose();
+    _draw_diamond_button(ctx, width, height) {
+      ctx.rotate(45 * (Math.PI / 180));
+      this.__draw_square_button(ctx, width * 0.75, height * 0.75, 0);
+    }
+
+    _draw_square_button(ctx, width, height) {
+      this.__draw_square_button(ctx, width - 8, height - 8, width / 4);
+    }
+
+    _draw_dash_button(ctx, width, height) {
+      this.__draw_square_button(ctx, width, height / 2, width * 0.25);
+    }
+
+    __draw_square_button(ctx, width, height, radius) {
+      let clr = this.state.hovered
+        ? this.state.color_hovered
+        : this.state.color;
+
+      Drawing.draw_rounded_rect(
+        ctx,
+        clr,
+        -width / 2,
+        -height / 2,
+        width,
+        height,
+        0,
+        radius
+      );
+      // Drawing.draw_circle(ctx, clr, 0, 0, width, false);
     }
 
     destroy() {}
@@ -80,27 +162,17 @@ var CreateButtonIcon = (idx, sz, sx, sy, container, onClick) => {
   let styles = [
     {
       color: [255 / 255, 87 / 255, 79 / 255, 1],
-      color_hovered: [255 / 255, (87 / 255) * 0.5, (79 / 255) * 0.5, 1],
+      color_hovered: [255 / 255, 42 / 255, 37 / 255, 1],
     },
     {
       color: [193 / 255, 154 / 255, 50 / 255, 1],
-      color_hovered: [193 / 255, 154 / 255, (50 / 255) * 0.5, 1],
+      color_hovered: [255 / 255, 193 / 255, 40 / 255, 1],
     },
     {
       color: [42 / 255, 208 / 255, 67 / 255, 1],
-      color_hovered: [(42 / 255) * 0.5, 208 / 255, (67 / 255) * 0.5, 1],
+      color_hovered: [32 / 255, 255 / 255, 57 / 255, 1],
     },
   ];
-  styles.forEach((s) => {
-    s.color_hovered[0] *= 1.2;
-    s.color_hovered[1] *= 1.2;
-    s.color_hovered[2] *= 1.2;
-    for (let i = 0; i < 3; i++) {
-      if (s.color_hovered[i] > 255) {
-        s.color_hovered[i] = 255;
-      }
-    }
-  });
   let btn = new St.Button({ name: `cwc-btn-${idx}` });
   container.add_child(btn);
 
@@ -121,6 +193,10 @@ var CreateButtonIcon = (idx, sz, sx, sy, container, onClick) => {
     d.set_hovered(btn.hover);
   });
   btn.connect('clicked', () => {
-    onClick(idx);
+    if (onClick) {
+      onClick(idx);
+    }
   });
+
+  return d;
 };

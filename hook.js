@@ -17,17 +17,46 @@ const getRunningTimers = Me.imports.utils.getRunningTimers;
 const BTN_COUNT = 3;
 
 var Hook = class {
+  _windowSettingFromClass(wm) {
+    this._button_count = BTN_COUNT;
+
+    if (this.extension.window_list) {
+      let blacklisted = this.extension.window_list.find((i) =>
+        i['wm_class'].startsWith(wm)
+      );
+      this._customWindowSetting = blacklisted;
+      if (blacklisted) {
+        if (blacklisted['exclude-window']) {
+          return true;
+        }
+      }
+      // if (['google-chrome'].includes(wm)) {
+      //   return;
+      // }
+    }
+
+    if (this._customWindowSetting) {
+      if (this._customWindowSetting['close-button-only']) {
+        this._button_count = 1;
+      }
+    }
+
+    return false;
+  }
+
   attach(window) {
+    this._window = window;
+    this._window._hook = this;
+
     // exclude?
-    let wm = window.get_wm_class_instance();
-    if (wm == '') return;
-    if (['google-chrome'].includes(wm)) {
+    this._wm = window.get_wm_class_instance();
+    if (this._wm == '') return;
+
+    if (this._windowSettingFromClass(this._wm)) {
       return;
     }
 
     this._attached = true;
-    this._window = window;
-    this._window._hook = this;
 
     let container = new St.Widget({ name: 'cwc-container' });
     this._window._parent.add_child(container);
@@ -86,10 +115,37 @@ var Hook = class {
     this._window._parent.remove_effect_by_name('cwc-color');
   }
 
+  update() {
+    if (this._attached && this._windowSettingFromClass(this._wm)) {
+      this.release();
+      return;
+    }
+    if (!this._attached && !this._windowSettingFromClass(this._wm)) {
+      this.attach(this._window);
+      return;
+    }
+    if (
+      this._current_button_count &&
+      this._current_button_count != this._button_count
+    ) {
+      this._createButtons(true);
+      this._reposition();
+      return;
+    }
+    if (
+      this._current_button_style &&
+      this._current_button_style != this.extension.button_style
+    ) {
+      this._createButtons(true);
+      this._reposition();
+      return;
+    }
+  }
+
   setActive(t) {
     if (this._container) {
       this._container.style = t ? '' : 'background: rgba(255,255,255,0)';
-      // this._container.visible = t;
+      this._container.visible = t;
       this._effect.enabled = t;
     }
   }
@@ -105,7 +161,7 @@ var Hook = class {
     let sy = frame_rect.y - buffer_rect.y;
 
     let offset = [5 * scale, 6 * scale];
-    let cw = 38 * BTN_COUNT * scale;
+    let cw = 38 * this._button_count * scale;
     let ch = 34 * scale;
 
     sx += offset[0];
@@ -149,13 +205,15 @@ var Hook = class {
 
     let scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
 
+    let button_style = this.extension.button_style || 'circle';
+
     let padding = 8 * scale;
     let spacing = 12 * scale;
     let sx = padding * 2;
     let sy = padding;
-    for (let i = 0; i < BTN_COUNT; i++) {
+    for (let i = 0; i < this._button_count; i++) {
       let sz = 16 * scale;
-      CreateButtonIcon(
+      let btn = CreateButtonIcon(
         i,
         sz,
         sx,
@@ -164,11 +222,18 @@ var Hook = class {
         this._onButtonClicked.bind(this)
       );
       sx += sz + spacing;
+
+      btn.set_state({
+        type: button_style,
+      });
+
+      this._current_button_style = button_style;
     }
+
+    this._current_button_count = this._button_count;
   }
 
   _onButtonClicked(id) {
-    // log(`clicked ${id}`);
     switch (id) {
       case 0:
         this._window.delete(0);

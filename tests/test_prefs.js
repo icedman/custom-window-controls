@@ -147,6 +147,21 @@ let prefKeys = new PrefKeys();
 //   },
 // });
 
+function add_window_row(placeholder) {
+  let builder = new Gtk.Builder();
+  builder.add_from_file(`ui/window-row.ui`);
+  let row = builder.get_object('window-row-template');
+  row._index = 0;
+  placeholder.add(row);
+
+  print(placeholder.children);
+
+  let remove_button = builder.get_object('remove-window');
+  remove_button.connect('clicked', () => {
+    placeholder.remove(row);
+  });
+}
+
 let app = new Adw.Application({
   application_id: 'com.custom-window-controls.GtkApplication',
 });
@@ -166,6 +181,17 @@ app.connect('activate', (me) => {
   builder.add_from_file(`ui/general.ui`);
   builder.add_from_file(`ui/menu.ui`);
   w.add(builder.get_object('general'));
+
+  let window_group = builder.get_object('windows-group');
+
+  let pick_window = builder.get_object('pick-window');
+  pick_window.connect('clicked', () => {
+    add_window_row(window_group);
+  });
+
+  add_window_row(window_group);
+  // add_window_row(window_group);
+  // add_window_row(window_group);
 
   let menu_util = builder.get_object('menu_util');
   w.add(menu_util);

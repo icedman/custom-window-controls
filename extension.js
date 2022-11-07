@@ -78,13 +78,25 @@ class Extension {
     SettingsKeys.connectSettings(this._settings, (name, value) => {
       let n = name.replace(/-/g, '_');
       this[n] = value;
+
+      switch (name) {
+        case 'control-button-style':
+          this._updateButtonStyle();
+          break;
+      }
+
+      this._hookWindows();
     });
     Object.keys(SettingsKeys._keys).forEach((k) => {
       let key = SettingsKeys.getKey(k);
       let name = k.replace(/-/g, '_');
       this[name] = key.value;
+      if (key.options) {
+        this[`${name}_options`] = key.options;
+      }
     });
 
+    this._updateButtonStyle();
     this._addEvents();
 
     // startup
@@ -94,7 +106,7 @@ class Extension {
   disable() {
     clearAllTimers();
 
-    this.dbus.export();
+    this.dbus.unexport();
     this.dbus = null;
 
     this._gsettings.set_string('button-layout', this._layout || '');
@@ -105,6 +117,11 @@ class Extension {
 
     this._removeEvents();
     this._releaseWindows();
+  }
+
+  _updateButtonStyle() {
+    this.button_style =
+      this.control_button_style_options[this.control_button_style] || 'circle';
   }
 
   _addEvents() {
@@ -201,7 +218,10 @@ class Extension {
     this._windows.forEach((w) => {
       if (!w._hook) {
         w._hook = new Hook();
+        w._hook.extension = this;
         w._hook.attach(w);
+      } else {
+        w._hook.update();
       }
     });
   }

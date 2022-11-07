@@ -1,25 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="custom-window-controls">
   <schema path="/org/gnome/shell/extensions/custom-window-controls/" id="org.gnome.shell.extensions.custom-window-controls">
-    <key type="d" name="border-radius">
-        <default>3</default>
-        <summary>Border radius</summary>
-        <description>Set window background border radius.</description>
-    </key>
-    <key type="(dddd)" name="background-color">
+    <key type="(dddd)" name="accent-color">
         <default>(0.,0.,0.,0.25)</default>
-        <summary>Background color</summary>
-        <description>Set window background color.</description>
+        <summary>Accent color</summary>
+        <description>Set accent color.</description>
     </key>
-    <key type="d" name="scale-width">
-        <default>0.1</default>
-        <summary>Scale width</summary>
-        <description>Rescale width/</description>
+    <key type="i" name="control-button-style">
+        <default>0</default>
+        <summary>Control button</summary>
+        <description>Control button</description>
     </key>
-    <key type="d" name="scale-height">
-        <default>0.1</default>
-        <summary>Scale height</summary>
-        <description>Rescale height/</description>
+    <key type="s" name="window-list">
+        <default>""</default>
+        <summary>Window list</summary>
+        <description>Window list JSON.strinfy-ied</description>
     </key>
   </schema>
 </schemalist>

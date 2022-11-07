@@ -13,11 +13,173 @@ const _ = Gettext.gettext;
 const ExtensionUtils = imports.misc.extensionUtils;
 
 const { schemaId, settingsKeys } = Me.imports.preferences.keys;
+const { PrefKeys } = Me.imports.preferences.prefKeys;
 
 function init() {
   let iconTheme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
   iconTheme.add_search_path(`${UIFolderPath}/icons`);
   ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
+}
+
+function _do_pick_window(builder, settings, remove_if_failed = false) {
+  // a mechanism to know if the extension is listening correcly
+  let has_responded = false;
+  let should_take_answer = true;
+  setTimeout((_) => {
+    if (!has_responded) {
+      log('picking failed!');
+    }
+  }, 15);
+
+  on_picking((_) => (has_responded = true));
+
+  on_picked((wm_class) => {
+    if (should_take_answer) {
+      if (wm_class == 'window-not-found' || !wm_class) {
+        log('not found');
+        return;
+      }
+      if (windowListContains(settings, { wm_class })) {
+        log('already exists');
+        return;
+      }
+      let window_group = builder.get_object('windows-group');
+      let pick_window = builder.get_object('pick-window');
+      let data = addWindowRow(window_group, settings, wm_class);
+      addToWindowList(window_group, settings, data);
+    }
+  });
+
+  pick();
+}
+
+const WINDOW_LIST_ID = 'window-list';
+
+function extractWindowList(settings) {
+  let s = settings.get_string(WINDOW_LIST_ID) || '[]';
+  let obj = [];
+  try {
+    obj = JSON.parse(s) || [];
+    obj = obj
+      .filter((i) => i != null)
+      .map((i) => {
+        if (typeof i === 'object') {
+          return i;
+        }
+        return {
+          wm_class: i,
+        };
+      });
+  } catch (err) {
+    obj = [];
+  }
+  if (obj == null) {
+    obj = [];
+  }
+  return obj;
+}
+
+function loadWindowList(builder, settings) {
+  let window_group = builder.get_object('windows-group');
+  let obj = extractWindowList(settings);
+  obj.forEach((i) => {
+    if (typeof i === 'string') {
+      i = {
+        wm_class: i,
+      };
+    }
+    addWindowRow(window_group, settings, i);
+  });
+}
+
+function windowListContains(settings, data) {
+  let obj = extractWindowList(settings);
+  return obj.find((i) => {
+    return i.wm_class == data.wm_class;
+  });
+}
+function addToWindowList(placeholder, settings, data) {
+  log('add');
+  let obj = extractWindowList(settings);
+  let existing = false;
+  obj.forEach((item) => {
+    if (item.wm_class == data.wm_class) {
+      existing = true;
+      Object.keys(data).forEach((k) => {
+        item[k] = data[k];
+      });
+    }
+  });
+  if (!existing) {
+    obj.push(data);
+  }
+  log(obj);
+  settings.set_string(WINDOW_LIST_ID, JSON.stringify(obj));
+  return true;
+}
+
+function removeFromWindowList(placeholder, settings, data) {
+  log('remove');
+  let obj = extractWindowList(settings);
+  obj = obj.filter((i) => {
+    return i.wm_class != data.wm_class;
+  });
+  settings.set_string(WINDOW_LIST_ID, JSON.stringify(obj));
+}
+
+function addWindowRow(placeholder, settings, wm_class) {
+  let builder = new Gtk.Builder();
+  builder.add_from_file(`${UIFolderPath}/window-row.ui`);
+  let row = builder.get_object('window-row-template');
+  row._data = wm_class;
+  if (typeof row._data === 'string') {
+    row._data = {
+      wm_class,
+      'exclude-window': true,
+      'close-button-only': false,
+    };
+  }
+
+  if (!row._data.wm_class) return;
+  row.title = row._data.wm_class;
+
+  var prefKeys = new PrefKeys();
+  prefKeys.setKeys({
+    'exclude-window': {
+      default_value: row._data['exclude-window'],
+      widget_type: 'switch',
+      callback: (v) => {
+        row._data['exclude-window'] = v;
+        addToWindowList(placeholder, settings, row._data);
+      },
+    },
+    'close-button-only': {
+      default_value: row._data['close-button-only'],
+      widget_type: 'switch',
+      callback: (v) => {
+        row._data['close-button-only'] = v;
+        addToWindowList(placeholder, settings, row._data);
+      },
+    },
+  });
+  prefKeys.connectBuilder(builder);
+
+  let remove_button = builder.get_object('remove-window');
+  remove_button.connect('clicked', () => {
+    placeholder.remove(row);
+    removeFromWindowList(placeholder, settings, row._data);
+  });
+
+  placeholder.add(row);
+  return row._data;
+}
+
+function addButtonEvents(window, builder, settings) {
+  if (builder.get_object('pick-window')) {
+    builder.get_object('pick-window').connect('clicked', () => {
+      _do_pick_window(builder, settings);
+    });
+  }
 }
 
 function addMenu(window, builder) {
@@ -62,28 +224,6 @@ function addMenu(window, builder) {
   window.remove(menu_util);
 }
 
-function buildPrefsWidget() {
-  let notebook = new Gtk.Notebook();
-
-  let builder = new Gtk.Builder();
-  builder.add_from_file(`${UIFolderPath}/legacy/general.ui`);
-  builder.add_from_file(`${UIFolderPath}/menu.ui`);
-  notebook.append_page(
-    builder.get_object('general'),
-    new Gtk.Label({ label: _('General') })
-  );
-
-  SettingsKeys.connectBuilder(builder);
-  SettingsKeys.connectSettings(ExtensionUtils.getSettings(schemaId));
-
-  notebook.connect('realize', () => {
-    let gtkVersion = Gtk.get_major_version();
-    let w = gtkVersion === 3 ? notebook.get_toplevel() : notebook.get_root();
-    addMenu(w, builder);
-  });
-  return notebook;
-}
-
 function fillPreferencesWindow(window) {
   let builder = new Gtk.Builder();
 
@@ -95,5 +235,9 @@ function fillPreferencesWindow(window) {
   SettingsKeys.connectBuilder(builder);
   SettingsKeys.connectSettings(ExtensionUtils.getSettings(schemaId));
 
+  let settings = ExtensionUtils.getSettings(schemaId);
+  addButtonEvents(window, builder, settings);
   addMenu(window, builder);
+
+  loadWindowList(builder, settings);
 }
