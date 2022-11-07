@@ -80,6 +80,8 @@ class Extension {
       this[n] = value;
 
       switch (name) {
+        case 'traffic-light-colors':
+        case 'button-color':
         case 'control-button-style':
           this._updateButtonStyle();
           break;

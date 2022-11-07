@@ -19,6 +19,8 @@ var Button = GObject.registerClass(
       if (sz) size = sz;
 
       this.state = {
+        traffic_light: true,
+        uniform_color: [1.0, 1.0, 1.0, 1.0],
         color: [0.8, 0.0, 0.0, 1.0],
         color_hovered: [1.0, 0.0, 0.0, 1.0],
         type: 'circle',
@@ -87,6 +89,19 @@ var Button = GObject.registerClass(
       func(ctx, width, height);
     }
 
+    _get_color() {
+      let clr = this.state.hovered
+        ? this.state.color_hovered
+        : this.state.color;
+
+      if (!this.state.traffic_light) {
+        clr = this.state.hovered
+          ? this.state.color_hovered
+          : this.state.uniform_color;
+      }
+      return clr;
+    }
+
     _draw_vertical_button(ctx, width, height) {
       ctx.rotate(90 * (Math.PI / 180));
       this._draw_dash_button(ctx, width, height);
@@ -113,10 +128,7 @@ var Button = GObject.registerClass(
     }
 
     _draw_circle_button(ctx, width, height) {
-      let clr = this.state.hovered
-        ? this.state.color_hovered
-        : this.state.color;
-
+      let clr = this._get_color();
       Drawing.draw_circle(ctx, clr, 0, 0, width, false);
     }
 
@@ -134,9 +146,7 @@ var Button = GObject.registerClass(
     }
 
     __draw_square_button(ctx, width, height, radius) {
-      let clr = this.state.hovered
-        ? this.state.color_hovered
-        : this.state.color;
+      let clr = this._get_color();
 
       Drawing.draw_rounded_rect(
         ctx,
@@ -158,7 +168,7 @@ var Button = GObject.registerClass(
 // FF574F
 // C19A32
 // 2AD043
-var CreateButtonIcon = (idx, sz, sx, sy, container, onClick) => {
+var CreateButtonIcon = (idx, sz, sx, sy, container, onClick, settings) => {
   let styles = [
     {
       color: [255 / 255, 87 / 255, 79 / 255, 1],

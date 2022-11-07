@@ -124,21 +124,36 @@ var Hook = class {
       this.attach(this._window);
       return;
     }
-    if (
-      this._current_button_count &&
-      this._current_button_count != this._button_count
-    ) {
+    if (this._button_icons && this._button_icons.length != this._button_count) {
       this._createButtons(true);
       this._reposition();
       return;
     }
-    if (
-      this._current_button_style &&
-      this._current_button_style != this.extension.button_style
-    ) {
-      this._createButtons(true);
-      this._reposition();
-      return;
+
+    this._updateButtonStyle();
+  }
+
+  _updateButtonStyle() {
+    if (this._button_icons) {
+      let traffic_light = this.extension.traffic_light_colors;
+      let uniform_color = this.extension.button_color;
+
+      // no magenta colors
+      if (
+        uniform_color[0] > 0.6 &&
+        uniform_color[2] > 0.6 &&
+        uniform_color[0] - uniform_color[1] > 0.4
+      ) {
+        traffic_light = true;
+      }
+
+      this._button_icons.forEach((b) => {
+        b.set_state({
+          type: this.extension.button_style,
+          traffic_light: traffic_light,
+          uniform_color: uniform_color,
+        });
+      });
     }
   }
 
@@ -206,6 +221,7 @@ var Hook = class {
     let scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
 
     let button_style = this.extension.button_style || 'circle';
+    this._button_icons = [];
 
     let padding = 8 * scale;
     let spacing = 12 * scale;
@@ -219,18 +235,14 @@ var Hook = class {
         sx,
         sy,
         this._container,
-        this._onButtonClicked.bind(this)
+        this._onButtonClicked.bind(this),
+        this.extension
       );
       sx += sz + spacing;
-
-      btn.set_state({
-        type: button_style,
-      });
-
-      this._current_button_style = button_style;
+      this._button_icons.push(btn);
     }
 
-    this._current_button_count = this._button_count;
+    this._updateButtonStyle();
   }
 
   _onButtonClicked(id) {

@@ -65,17 +65,29 @@
         </child>
         <child>
           <object class="AdwActionRow">
-            <property name="title" translatable="yes">Color</property>
-            <property name="subtitle" translatable="yes">Set accent window color.</property>
-            <property name="activatable-widget">accent-color</property>
+            <property name="title" translatable="yes">Traffic Lights</property>
+            <property name="subtitle" translatable="yes">Use Red, Yellow, Green for button colors.</property>
+            <property name="activatable-widget">traffic-light-colors</property>
             <child>
-              <object class="GtkColorButton" id="accent-color">
+              <object class="GtkSwitch" id="traffic-light-colors">
+                <property name="valign">center</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwActionRow">
+            <property name="title" translatable="yes">Color</property>
+            <property name="subtitle" translatable="yes">Set a uniform color for all buttons.</property>
+            <property name="activatable-widget">button-color</property>
+            <child>
+              <object class="GtkColorButton" id="button-color">
                 <property name="valign">center</property>
                 <property name="hexpand">false</property>
                 <property name="width-request">70px</property>
                 <property name="height-request">45px</property>
                 <property name="show-editor">true</property>
-                <property name="use-alpha">true</property>
+                <property name="use-alpha">false</property>
               </object>
             </child>
           </object>

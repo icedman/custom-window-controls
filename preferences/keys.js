@@ -25,8 +25,12 @@ SettingsKeys.setKeys({
       'back_slash',
     ],
   },
-  'accent-color': {
-    default_value: [0, 0, 0, 1],
+  'traffic-light-colors': {
+    default_value: true,
+    widget_type: 'switch',
+  },
+  'button-color': {
+    default_value: [1, 1, 1, 1],
     widget_type: 'color',
   },
 });

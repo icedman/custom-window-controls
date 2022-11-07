@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="custom-window-controls">
   <schema path="/org/gnome/shell/extensions/custom-window-controls/" id="org.gnome.shell.extensions.custom-window-controls">
-    <key type="(dddd)" name="accent-color">
-        <default>(0.,0.,0.,0.25)</default>
-        <summary>Accent color</summary>
-        <description>Set accent color.</description>
+    <key type="b" name="traffic-light-colors">
+        <default>true</default>
+        <summary>Traffic light color</summary>
+        <description>Traffic light color</description>
+    </key>
+    <key type="(dddd)" name="button-color">
+        <default>(1.,1.,1.,1.)</default>
+        <summary>Button color</summary>
+        <description>Set button color.</description>
     </key>
     <key type="i" name="control-button-style">
         <default>0</default>
