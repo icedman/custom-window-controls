@@ -18,6 +18,8 @@ publish:
 	cp stylesheet.css ./build
 	cp -r ui ./build
 	cp -r preferences ./build
+	cp -r effects ./build
+	cp -r dbus ./build
 	cp README.md ./build
 	cp -R schemas ./build
 	rm -rf ./*.zip

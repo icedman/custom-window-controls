@@ -98,6 +98,14 @@ var Button = GObject.registerClass(
           ? this.state.color_hovered
           : this.state.uniform_color;
       }
+      return [...clr];
+    }
+
+    _get_dark_color() {
+      let clr = this._get_color();
+      clr[0]*=0.8;
+      clr[1]*=0.8;
+      clr[2]*=0.8;
       return clr;
     }
 
@@ -128,7 +136,9 @@ var Button = GObject.registerClass(
 
     _draw_circle_button(ctx, width, height) {
       let clr = this._get_color();
-      Drawing.draw_circle(ctx, clr, 0, 0, width, false);
+      let dark = this._get_dark_color();
+      Drawing.draw_circle(ctx, dark, 0, 0, width, false);
+      Drawing.draw_circle(ctx, clr, 0, 0, width*0.8, false);
     }
 
     _draw_diamond_button(ctx, width, height) {
@@ -137,7 +147,7 @@ var Button = GObject.registerClass(
     }
 
     _draw_square_button(ctx, width, height) {
-      this.__draw_square_button(ctx, width * 0.65, height * 0.65, 0);
+      this.__draw_square_button(ctx, width * 0.8, height * 0.8, 0);
     }
 
     _draw_dash_button(ctx, width, height) {
@@ -146,7 +156,21 @@ var Button = GObject.registerClass(
 
     __draw_square_button(ctx, width, height, radius) {
       let clr = this._get_color();
+      let dark = this._get_dark_color();
 
+      Drawing.draw_rounded_rect(
+        ctx,
+        dark,
+        -width / 2,
+        -height / 2,
+        width,
+        height,
+        0,
+        radius
+      );
+
+      width *= 0.8;
+      height *= 0.8;
       Drawing.draw_rounded_rect(
         ctx,
         clr,
