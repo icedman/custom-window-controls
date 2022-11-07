@@ -73,7 +73,6 @@ var Button = GObject.registerClass(
         this._draw_circle_button,
         this._draw_square_button,
         this._draw_dash_button,
-        this._draw_diamond_button,
         this._draw_vertical_button,
         this._draw_slash_button,
         this._draw_back_slash_button,
@@ -134,11 +133,11 @@ var Button = GObject.registerClass(
 
     _draw_diamond_button(ctx, width, height) {
       ctx.rotate(45 * (Math.PI / 180));
-      this.__draw_square_button(ctx, width * 0.75, height * 0.75, 0);
+      this.__draw_square_button(ctx, width * 0.65, height * 0.65, 0);
     }
 
     _draw_square_button(ctx, width, height) {
-      this.__draw_square_button(ctx, width - 8, height - 8, width / 4);
+      this.__draw_square_button(ctx, width * 0.65, height * 0.65, 0);
     }
 
     _draw_dash_button(ctx, width, height) {

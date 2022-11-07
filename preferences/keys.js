@@ -15,15 +15,7 @@ SettingsKeys.setKeys({
   'control-button-style': {
     default_value: 0,
     widget_type: 'dropdown',
-    options: [
-      'circle',
-      'square',
-      'dash',
-      'diamond',
-      'vertical',
-      'slash',
-      'back_slash',
-    ],
+    options: ['circle', 'square', 'dash', 'vertical', 'slash', 'back_slash'],
   },
   'traffic-light-colors': {
     default_value: true,
