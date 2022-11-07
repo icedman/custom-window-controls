@@ -27,6 +27,10 @@ void main() {
         cout = vec4(c.r, c.g, c.b, c.a);
     }
 
+    // if (coord.x < x1) {
+    //     cout.a = 0.8;
+    // }
+
     /*
     // tint the titlebar
     if ((coord.y <= y2*0.75) && ((c.r < 0.8 && c.g < 0.8 && c.b < 0.8)

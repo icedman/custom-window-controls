@@ -67,10 +67,13 @@ class Extension {
       schema_id: 'org.gnome.desktop.wm.preferences',
     });
     this._layout = this._gsettings.get_string('button-layout');
+    this.layout_right = this._layout.startsWith('appmenu');
+
     this._gsettings.set_string(
       'button-layout',
-      'close,minimize,maximize:appmenu'
-      // 'appmenu:maximize,minimize,close' // if right layout
+      !this.layout_right
+        ? 'close,minimize,maximize:appmenu'
+        : 'appmenu:maximize,minimize,close'
     );
 
     this._settings = ExtensionUtils.getSettings(schemaId);

@@ -95,11 +95,12 @@ var Hook = class {
 
     this._reposition();
 
+    // ubuntu (gnome 42) .. libadwait seems slow
     beginTimer(
       runOneShot(() => {
         this._deferredShow = false;
         this._reposition();
-      }, 0.16)
+      }, 0.2)
     );
   }
 
@@ -165,10 +166,23 @@ var Hook = class {
     }
   }
 
-  _reposition() {
+  _precompute() {
     let scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+    let sz = 16;
+    let cw = 38 * this._button_count * scale;
+    let ch = 34 * scale;
+    this._buttonSize = sz;
+    this._scale = scale;
+    this._controlWidth = cw;
+    this._controlHeight = ch;
+  }
 
-    // compute
+  _reposition() {
+    this._precompute();
+    let scale = this._scale;
+    let cw = this._controlWidth;
+    let ch = this._controlHeight;
+
     let buffer_rect = this._window.get_buffer_rect();
     let frame_rect = this._window.get_frame_rect();
 
@@ -176,19 +190,20 @@ var Hook = class {
     let sy = frame_rect.y - buffer_rect.y;
 
     let offset = [5 * scale, 6 * scale];
-    let cw = 38 * this._button_count * scale;
-    let ch = 34 * scale;
 
-    sx += offset[0];
-    this._effect.x1 = sx / buffer_rect.width;
-    this._effect.x2 = (sx + cw * 2) / buffer_rect.width;
-
-    // if right layout
-    // sx += buffer_rect.width;
-    // sx -= offset[0];
-    // sx -= (cw * 2);
-    // this._effect.x1 = sx / 2 / buffer_rect.width;
-    // this._effect.x2 = 1.0; // (sx + cw * 2) / buffer_rect.width;
+    if (this.extension.layout_right) {
+      cw -= this._button_count * scale;
+      sx += frame_rect.width;
+      sx -= cw;
+      sx -= offset[0] + 4;
+      this._effect.x1 = sx / buffer_rect.width;
+      this._effect.x2 = (sx + cw * 1.2) / buffer_rect.width;
+      sx += offset[0];
+    } else {
+      sx += offset[0];
+      this._effect.x1 = sx / buffer_rect.width;
+      this._effect.x2 = (sx + cw * 1.2) / buffer_rect.width;
+    }
 
     sy += offset[1];
     this._effect.y1 = sy / buffer_rect.height;
@@ -220,6 +235,11 @@ var Hook = class {
   }
 
   _createButtons(recreate) {
+    this._precompute();
+    let scale = this._scale;
+    let cw = this._controlWidth;
+    let ch = this._controlHeight;
+
     let children = this._container.get_children();
     if (children.length) {
       if (!recreate) {
@@ -228,8 +248,6 @@ var Hook = class {
       this._destroyButtons();
     }
 
-    let scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-
     let button_style = this.extension.button_style || 'circle';
     this._button_icons = [];
 
@@ -237,10 +255,18 @@ var Hook = class {
     let spacing = 12 * scale;
     let sx = padding * 2;
     let sy = padding;
+    let sz = this._buttonSize * scale;
+    let dx = sz + spacing;
+    if (this.extension.layout_right && this._button_count > 1) {
+      sx += dx / 2;
+    }
     for (let i = 0; i < this._button_count; i++) {
-      let sz = 16 * scale;
+      let btn_idx = i;
+      if (this.extension.layout_right) {
+        btn_idx = this._button_count - i - 1;
+      }
       let btn = CreateButtonIcon(
-        i,
+        btn_idx,
         sz,
         sx,
         sy,
@@ -248,7 +274,7 @@ var Hook = class {
         this._onButtonClicked.bind(this),
         this.extension
       );
-      sx += sz + spacing;
+      sx += dx;
       this._button_icons.push(btn);
     }
 
