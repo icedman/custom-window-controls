@@ -130,7 +130,11 @@ var Hook = class {
       this._reposition();
       return;
     }
-
+    if (this._layout_right != this.extension.layout_right) {
+      this._createButtons(true);
+      this._reposition();
+      return;
+    }
     this._updateButtonStyle();
   }
 
@@ -191,6 +195,7 @@ var Hook = class {
 
     let offset = [5 * scale, 6 * scale];
 
+    this._layout_right = this.extension.layout_right;
     if (this.extension.layout_right) {
       cw -= this._button_count * scale;
       sx += frame_rect.width;

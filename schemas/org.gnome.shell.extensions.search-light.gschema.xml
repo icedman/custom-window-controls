@@ -11,10 +11,15 @@
         <summary>Button color</summary>
         <description>Set button color.</description>
     </key>
+    <key type="i" name="button-layout">
+        <default>0</default>
+        <summary>Button layout</summary>
+        <description>Button layout</description>
+    </key>
     <key type="i" name="control-button-style">
         <default>0</default>
-        <summary>Control button</summary>
-        <description>Control button</description>
+        <summary>Control button style</summary>
+        <description>Control button style</description>
     </key>
     <key type="s" name="window-list">
         <default>""</default>

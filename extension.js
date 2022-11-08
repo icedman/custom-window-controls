@@ -67,14 +67,6 @@ class Extension {
       schema_id: 'org.gnome.desktop.wm.preferences',
     });
     this._layout = this._gsettings.get_string('button-layout');
-    this.layout_right = this._layout.startsWith('appmenu');
-
-    this._gsettings.set_string(
-      'button-layout',
-      !this.layout_right
-        ? 'close,minimize,maximize:appmenu'
-        : 'appmenu:maximize,minimize,close'
-    );
 
     this._settings = ExtensionUtils.getSettings(schemaId);
     this._settingsKeys = SettingsKeys;
@@ -89,6 +81,9 @@ class Extension {
         case 'control-button-style':
           this._updateButtonStyle();
           break;
+        case 'button-layout':
+          this._updateButtonLayout();
+          break;
       }
 
       this._hookWindows();
@@ -102,6 +97,7 @@ class Extension {
       }
     });
 
+    this._updateButtonLayout();
     this._updateButtonStyle();
     this._addEvents();
 
@@ -123,6 +119,20 @@ class Extension {
 
     this._removeEvents();
     this._releaseWindows();
+  }
+
+  _updateButtonLayout() {
+    if (this.button_layout != 0) {
+      this.layout_right = this.button_layout == 2;
+    } else {
+      this.layout_right = this._layout.startsWith('appmenu');
+    }
+    this._gsettings.set_string(
+      'button-layout',
+      !this.layout_right
+        ? 'close,minimize,maximize:appmenu'
+        : 'appmenu:maximize,minimize,close'
+    );
   }
 
   _updateButtonStyle() {

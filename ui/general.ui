@@ -52,7 +52,20 @@
         <property name="description" translatable="yes"/>
         <child>
           <object class="AdwActionRow">
-            <property name="title" translatable="yes">Controll Button Style</property>
+            <property name="title" translatable="yes">Button Layout</property>
+            <property name="subtitle" translatable="yes">Set the window control buttons position.</property>
+            <property name="activatable-widget">button-layout</property>
+            <child>
+              <object class="GtkDropDown" id="button-layout">
+                <property name="valign">center</property>
+                <property name="model">button-layout-model</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwActionRow">
+            <property name="title" translatable="yes">Button Style</property>
             <property name="subtitle" translatable="yes">Customize the window control buttons style.</property>
             <property name="activatable-widget">control-button-style</property>
             <child>
@@ -94,6 +107,13 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkStringList" id="button-layout-model">
+    <items>
+      <item translatable="yes">default</item>
+      <item translatable="yes">left</item>
+      <item translatable="yes">right</item>
+    </items>
   </object>
   <object class="GtkStringList" id="control-button-style-model">
     <items>
