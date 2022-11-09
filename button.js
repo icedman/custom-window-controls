@@ -7,6 +7,14 @@ const Drawing = Me.imports.drawing.Drawing;
 
 let size = 400;
 
+function combine(a, b, r) {
+  let c = [0, 0, 0];
+  for (let i = 0; i < 3; i++) {
+    c[i] = a[i] * r + b[i] * (1 - r);
+  }
+  return c;
+}
+
 var Button = GObject.registerClass(
   {
     Properties: {},
@@ -23,6 +31,9 @@ var Button = GObject.registerClass(
         uniform_color: [1.0, 1.0, 1.0, 1.0],
         color: [0.8, 0.0, 0.0, 1.0],
         color_hovered: [1.0, 0.0, 0.0, 1.0],
+        unfocused_color: [0.8, 0.0, 0.0, 1.0],
+        hovered_color: [1.0, 0.0, 0.0, 1.0],
+        focused: true,
         type: 'circle',
       };
 
@@ -93,11 +104,21 @@ var Button = GObject.registerClass(
         ? this.state.color_hovered
         : this.state.color;
 
-      if (!this.state.traffic_light) {
-        clr = this.state.hovered
-          ? this.state.color_hovered
-          : this.state.uniform_color;
+      if (this.state.focused) {
+        if (!this.state.hovered && !this.state.traffic_light) {
+          clr = this.state.uniform_color;
+        }
+        if (this.state.hovered && !this.state.hovered_traffic_light) {
+          clr = this.state.hovered_color;
+        }
+      } else {
+        if (!this.state.unfocused_traffic_light) {
+          clr = this.state.unfocused_color;
+        } else {
+          clr = combine(clr, [0, 0, 0, 0], 0.8);
+        }
       }
+
       return clr;
     }
 

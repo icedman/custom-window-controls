@@ -28,13 +28,8 @@ const Me = ExtensionUtils.getCurrentExtension();
 const { schemaId, settingsKeys, SettingsKeys } = Me.imports.preferences.keys;
 
 const Hook = Me.imports.hook.Hook;
+const Timer = Me.imports.timer.Timer;
 
-const runSequence = Me.imports.utils.runSequence;
-const runOneShot = Me.imports.utils.runOneShot;
-const runLoop = Me.imports.utils.runLoop;
-const beginTimer = Me.imports.utils.beginTimer;
-const clearAllTimers = Me.imports.utils.clearAllTimers;
-const getRunningTimers = Me.imports.utils.getRunningTimers;
 const ApplicationsService = Me.imports.dbus.services.ApplicationsService;
 
 const _ = ExtensionUtils.gettext;
@@ -60,6 +55,9 @@ class Extension {
   enable() {
     Main._customWindowControls = this;
 
+    this._hiTimer = new Timer();
+    this._hiTimer.warmup(25);
+
     this.dbus = new ApplicationsService();
     this.dbus.export();
 
@@ -78,11 +76,16 @@ class Extension {
       switch (name) {
         case 'traffic-light-colors':
         case 'button-color':
+        case 'hovered-traffic-light-colors':
+        case 'hovered-button-color':
+        case 'unfocused-traffic-light-colors':
+        case 'unfocused-button-color':
         case 'control-button-style':
           this._updateButtonStyle();
           break;
         case 'button-layout':
           this._updateButtonLayout();
+          this._hookWindows(true);
           break;
       }
 
@@ -106,7 +109,8 @@ class Extension {
   }
 
   disable() {
-    clearAllTimers();
+    this._hiTimer.stop();
+    this._hiTimer = null;
 
     this.dbus.unexport();
     this.dbus = null;
@@ -229,7 +233,7 @@ class Extension {
     });
   }
 
-  _hookWindows() {
+  _hookWindows(force) {
     this._windows = this._findWindows();
     this._windows.forEach((w) => {
       if (!w._hook) {
@@ -237,7 +241,7 @@ class Extension {
         w._hook.extension = this;
         w._hook.attach(w);
       } else {
-        w._hook.update();
+        w._hook.update(force);
       }
     });
   }

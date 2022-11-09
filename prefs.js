@@ -228,8 +228,10 @@ function fillPreferencesWindow(window) {
   let builder = new Gtk.Builder();
 
   builder.add_from_file(`${UIFolderPath}/general.ui`);
+  builder.add_from_file(`${UIFolderPath}/appearance.ui`);
   builder.add_from_file(`${UIFolderPath}/menu.ui`);
   window.add(builder.get_object('general'));
+  window.add(builder.get_object('appearance'));
   window.set_search_enabled(true);
 
   SettingsKeys.connectBuilder(builder);

@@ -1,3 +1,5 @@
+'user strict';
+
 const { St, Shell, Gio, GLib, Gtk, Meta, Clutter } = imports.gi;
 const Main = imports.ui.main;
 
@@ -6,13 +8,6 @@ const Me = ExtensionUtils.getCurrentExtension();
 const ColorEffect = Me.imports.effects.color_effect.ColorEffect;
 const Button = Me.imports.button.Button;
 const CreateButtonIcon = Me.imports.button.CreateButtonIcon;
-
-const runSequence = Me.imports.utils.runSequence;
-const runOneShot = Me.imports.utils.runOneShot;
-const runLoop = Me.imports.utils.runLoop;
-const beginTimer = Me.imports.utils.beginTimer;
-const clearAllTimers = Me.imports.utils.clearAllTimers;
-const getRunningTimers = Me.imports.utils.getRunningTimers;
 
 const BTN_COUNT = 3;
 
@@ -91,17 +86,21 @@ var Hook = class {
     window._parent.add_effect_with_name('cwc-color', this._effect);
     window._parent.get_texture().connect('size-changed', () => {
       this._reposition();
+
+      // do twice.. for wayland
+      this.extension._hiTimer.runOnce(() => {
+        this._deferredShow = false;
+        this._reposition();
+      }, 10);
     });
 
     this._reposition();
 
     // ubuntu (gnome 42) .. libadwait seems slow
-    beginTimer(
-      runOneShot(() => {
-        this._deferredShow = false;
-        this._reposition();
-      }, 0.2)
-    );
+    this.extension._hiTimer.runOnce(() => {
+      this._deferredShow = false;
+      this._reposition();
+    }, 200);
   }
 
   release() {
@@ -116,7 +115,7 @@ var Hook = class {
     this._window._parent.remove_effect_by_name('cwc-color');
   }
 
-  update() {
+  update(force) {
     if (this._attached && this._windowSettingFromClass(this._wm)) {
       this.release();
       return;
@@ -130,18 +129,24 @@ var Hook = class {
       this._reposition();
       return;
     }
-    if (this._layout_right != this.extension.layout_right) {
+    this._updateButtonStyle();
+
+    if (this._container && force) {
       this._createButtons(true);
       this._reposition();
       return;
     }
-    this._updateButtonStyle();
   }
 
   _updateButtonStyle() {
     if (this._button_icons) {
       let traffic_light = this.extension.traffic_light_colors;
       let uniform_color = this.extension.button_color;
+      let hovered_traffic_light = this.extension.hovered_traffic_light_colors;
+      let hovered_color = this.extension.hovered_button_color;
+      let unfocused_traffic_light =
+        this.extension.unfocused_traffic_light_colors;
+      let unfocused_color = this.extension.unfocused_button_color;
 
       // no magenta colors
       if (
@@ -151,12 +156,30 @@ var Hook = class {
       ) {
         traffic_light = true;
       }
+      if (
+        hovered_color[0] > 0.6 &&
+        hovered_color[2] > 0.6 &&
+        hovered_color[0] - hovered_color[1] > 0.4
+      ) {
+        hovered_traffic_light = true;
+      }
+      if (
+        unfocused_color[0] > 0.6 &&
+        unfocused_color[2] > 0.6 &&
+        unfocused_color[0] - unfocused_color[1] > 0.4
+      ) {
+        unfocused_traffic_light = true;
+      }
 
       this._button_icons.forEach((b) => {
         b.set_state({
           type: this.extension.button_style,
           traffic_light: traffic_light,
           uniform_color: uniform_color,
+          hovered_traffic_light: hovered_traffic_light,
+          hovered_color: hovered_color,
+          unfocused_traffic_light: unfocused_traffic_light,
+          unfocused_color: unfocused_color,
         });
       });
     }
@@ -193,7 +216,7 @@ var Hook = class {
     let sx = frame_rect.x - buffer_rect.x;
     let sy = frame_rect.y - buffer_rect.y;
 
-    let offset = [5 * scale, 6 * scale];
+    let offset = [6 * scale, 6 * scale];
 
     this._layout_right = this.extension.layout_right;
     if (this.extension.layout_right) {
@@ -206,6 +229,9 @@ var Hook = class {
       sx += offset[0];
     } else {
       sx += offset[0];
+      if (this._window.is_fullscreen()) {
+        sx += 2 * scale;
+      }
       this._effect.x1 = sx / buffer_rect.width;
       this._effect.x2 = (sx + cw * 1.2) / buffer_rect.width;
     }
@@ -222,6 +248,12 @@ var Hook = class {
     if (!this._deferredShow) {
       this._container.visible = !this._window.is_fullscreen();
     }
+
+    this._button_icons.forEach((b) => {
+      b.set_state({
+        focused: this._window.has_focus(),
+      });
+    });
   }
 
   _onFocusWindow(w, e) {
@@ -280,6 +312,9 @@ var Hook = class {
         this.extension
       );
       sx += dx;
+      btn.set_state({
+        focused: this._window.has_focus(),
+      });
       this._button_icons.push(btn);
     }
 

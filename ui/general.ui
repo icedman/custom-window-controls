@@ -7,7 +7,7 @@
     <child>
       <object class="AdwPreferencesGroup" id="windows-group">
         <property name="title" translatable="yes">Window List</property>
-        <property name="description" translatable="yes"/>
+        <property name="description" translatable="yes">Add exceptions or custom settings for specific apps and windows.</property>
         <child>
           <object class="AdwActionRow" id="self-test-row">
             <property name="title" translatable="yes">Picker</property>
@@ -46,83 +46,5 @@
         </child>
       </object>
     </child>
-    <child>
-      <object class="AdwPreferencesGroup">
-        <property name="title" translatable="yes">Appearance</property>
-        <property name="description" translatable="yes"/>
-        <child>
-          <object class="AdwActionRow">
-            <property name="title" translatable="yes">Button Layout</property>
-            <property name="subtitle" translatable="yes">Set the window control buttons position.</property>
-            <property name="activatable-widget">button-layout</property>
-            <child>
-              <object class="GtkDropDown" id="button-layout">
-                <property name="valign">center</property>
-                <property name="model">button-layout-model</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="AdwActionRow">
-            <property name="title" translatable="yes">Button Style</property>
-            <property name="subtitle" translatable="yes">Customize the window control buttons style.</property>
-            <property name="activatable-widget">control-button-style</property>
-            <child>
-              <object class="GtkDropDown" id="control-button-style">
-                <property name="valign">center</property>
-                <property name="model">control-button-style-model</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="AdwActionRow">
-            <property name="title" translatable="yes">Traffic Lights</property>
-            <property name="subtitle" translatable="yes">Use Red, Yellow, Green for button colors.</property>
-            <property name="activatable-widget">traffic-light-colors</property>
-            <child>
-              <object class="GtkSwitch" id="traffic-light-colors">
-                <property name="valign">center</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="AdwActionRow">
-            <property name="title" translatable="yes">Color</property>
-            <property name="subtitle" translatable="yes">Set a uniform color for all buttons.</property>
-            <property name="activatable-widget">button-color</property>
-            <child>
-              <object class="GtkColorButton" id="button-color">
-                <property name="valign">center</property>
-                <property name="hexpand">false</property>
-                <property name="width-request">70px</property>
-                <property name="height-request">45px</property>
-                <property name="show-editor">true</property>
-                <property name="use-alpha">false</property>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkStringList" id="button-layout-model">
-    <items>
-      <item translatable="yes">default</item>
-      <item translatable="yes">left</item>
-      <item translatable="yes">right</item>
-    </items>
-  </object>
-  <object class="GtkStringList" id="control-button-style-model">
-    <items>
-      <item translatable="yes">circles</item>
-      <item translatable="yes">squares</item>
-      <item translatable="yes">dashes</item>
-      <item translatable="yes">bars</item>
-      <item translatable="yes">slashes</item>
-      <item translatable="yes">back slashes</item>
-    </items>
   </object>
 </interface>

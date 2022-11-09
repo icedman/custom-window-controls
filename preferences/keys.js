@@ -29,4 +29,20 @@ SettingsKeys.setKeys({
     default_value: [1, 1, 1, 1],
     widget_type: 'color',
   },
+  'hovered-traffic-light-colors': {
+    default_value: true,
+    widget_type: 'switch',
+  },
+  'hovered-button-color': {
+    default_value: [1, 1, 1, 1],
+    widget_type: 'color',
+  },
+  'unfocused-traffic-light-colors': {
+    default_value: true,
+    widget_type: 'switch',
+  },
+  'unfocused-button-color': {
+    default_value: [1, 1, 1, 1],
+    widget_type: 'color',
+  },
 });
