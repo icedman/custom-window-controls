@@ -53,6 +53,12 @@ var Hook = class {
 
     this._attached = true;
 
+    let border = new St.Widget({ name: 'cwc-border' });
+    this._window._parent.add_child(border);
+    this._border = border;
+    this._border.set_reactive(false);
+    // this._border.visible = false;
+
     let container = new St.Widget({ name: 'cwc-container' });
     this._window._parent.add_child(container);
     this._container = container;
@@ -85,21 +91,21 @@ var Hook = class {
 
     window._parent.add_effect_with_name('cwc-color', this._effect);
     window._parent.get_texture().connect('size-changed', () => {
-      this._reposition();
+      this._redisplay();
 
       // do twice.. for wayland
       this.extension._hiTimer.runOnce(() => {
         this._deferredShow = false;
-        this._reposition();
+        this._redisplay();
       }, 10);
     });
 
-    this._reposition();
+    this._redisplay();
 
     // ubuntu (gnome 42) .. libadwait seems slow
     this.extension._hiTimer.runOnce(() => {
       this._deferredShow = false;
-      this._reposition();
+      this._redisplay();
     }, 200);
   }
 
@@ -126,14 +132,14 @@ var Hook = class {
     }
     if (this._button_icons && this._button_icons.length != this._button_count) {
       this._createButtons(true);
-      this._reposition();
+      this._redisplay();
       return;
     }
     this._updateButtonStyle();
 
     if (this._container && force) {
       this._createButtons(true);
-      this._reposition();
+      this._redisplay();
       return;
     }
   }
@@ -204,7 +210,7 @@ var Hook = class {
     this._controlHeight = ch;
   }
 
-  _reposition() {
+  _redisplay() {
     this._precompute();
     let scale = this._scale;
     let cw = this._controlWidth;
@@ -213,8 +219,10 @@ var Hook = class {
     let buffer_rect = this._window.get_buffer_rect();
     let frame_rect = this._window.get_frame_rect();
 
-    let sx = frame_rect.x - buffer_rect.x;
-    let sy = frame_rect.y - buffer_rect.y;
+    let x = frame_rect.x - buffer_rect.x;
+    let y = frame_rect.y - buffer_rect.y;
+    let sx = x;
+    let sy = y;
 
     let offset = [6 * scale, 6 * scale];
 
@@ -240,6 +248,7 @@ var Hook = class {
     this._effect.y1 = sy / buffer_rect.height;
     this._effect.y2 = (sy + ch * 2) / buffer_rect.height;
 
+    // ... add settings
     // this._effect.focused = this._window.has_focus() ? 0.0 : 0.5;
 
     this._container.set_position(sx, sy);
@@ -254,14 +263,35 @@ var Hook = class {
         focused: this._window.has_focus(),
       });
     });
+
+    this._border.style = '';
+    this._border.set_position(x, y);
+    this._border.set_size(frame_rect.width, frame_rect.height);
+    if (this.extension.border_thickness) {
+      let bg = (this._window.has_focus()
+        ? this.extension.border_color
+        : this.extension.unfocused_border_color) || [1, 1, 1, 1];
+      let clr = bg.map((r) => Math.floor(255 * r));
+      clr[3] = bg[3];
+      let style = `border: ${
+        this.extension.border_thickness
+      }px solid rgba(${clr.join(',')});`;
+      if (this.extension.border_radius) {
+        style += ` border-radius: ${Math.floor(
+          this.extension.border_radius
+        )}px;`;
+      }
+      log(style);
+      this._border.style = style;
+    }
   }
 
   _onFocusWindow(w, e) {
-    this._reposition();
+    this._redisplay();
   }
 
   _onFullScreen() {
-    this._reposition();
+    this._redisplay();
   }
 
   _destroyButtons() {

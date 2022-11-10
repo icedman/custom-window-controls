@@ -124,9 +124,9 @@ var Button = GObject.registerClass(
 
     _get_dark_color() {
       let clr = this._get_color();
-      clr[0]*=0.8;
-      clr[1]*=0.8;
-      clr[2]*=0.8;
+      clr[0] *= 0.8;
+      clr[1] *= 0.8;
+      clr[2] *= 0.8;
       return clr;
     }
 
@@ -159,7 +159,7 @@ var Button = GObject.registerClass(
       let clr = this._get_color();
       let dark = this._get_dark_color();
       Drawing.draw_circle(ctx, dark, 0, 0, width, false);
-      Drawing.draw_circle(ctx, clr, 0, 0, width*0.8, false);
+      Drawing.draw_circle(ctx, clr, 0, 0, width * 0.8, false);
     }
 
     _draw_diamond_button(ctx, width, height) {

@@ -83,6 +83,10 @@ class Extension {
         case 'control-button-style':
           this._updateButtonStyle();
           break;
+        case 'border-thickness':
+        case 'border-color':
+        case 'border-radius':
+        case 'unfocused-border-color':
         case 'button-layout':
           this._updateButtonLayout();
           this._hookWindows(true);

@@ -1,10 +1,16 @@
 /*
-shader convert magenta to titlebar background
+shader converts magenta to titlebar background
 this covers existing buttons
 */
 #cwc-container {
   background: rgba(255,0,255,1);
 }
+
 #cwc-container:hover {
   /*border: 2px solid yellow;*/
+}
+
+#cwc-border {
+  /*border: 2px solid rgba(255,200,0,1);*/
+  /*border-radius: 10px;*/
 }
