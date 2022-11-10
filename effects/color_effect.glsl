@@ -41,7 +41,8 @@ void main() {
 
     // darken window
     if (focused > 0.1 && focused < 0.9) {
-        cout = vec4(cout.r*0.45, cout.g*0.45, cout.b*0.45, cout.a*0.8);
+        float dw = 0.85;
+        cout = vec4(cout.r*dw, cout.g*dw, cout.b*dw, cout.a*0.9);
     }
 
     cogl_color_out = cout;

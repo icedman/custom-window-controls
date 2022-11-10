@@ -116,6 +116,7 @@ var Hook = class {
     this._attached = false;
     this._destroyButtons();
     this._window._parent.remove_child(this._container);
+    this._window._parent.remove_child(this._border);
     this._window._parent.disconnectObject(this);
     this._window.disconnectObject(this);
     this._window._parent.remove_effect_by_name('cwc-color');
@@ -252,7 +253,7 @@ var Hook = class {
     // this._effect.focused = this._window.has_focus() ? 0.0 : 0.5;
 
     this._container.set_position(sx, sy);
-    this._container.set_size(cw, ch);
+    this._container.set_size(cw, ch-4);
 
     if (!this._deferredShow) {
       this._container.visible = !this._window.is_fullscreen();

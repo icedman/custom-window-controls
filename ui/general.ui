@@ -2,11 +2,11 @@
 <interface>
   <object class="AdwPreferencesPage" id="general">
     <property name="name">general</property>
-    <property name="title" translatable="yes">General</property>
+    <property name="title" translatable="yes">Blacklist</property>
     <property name="icon-name">general-symbolic</property>
     <child>
       <object class="AdwPreferencesGroup" id="windows-group">
-        <property name="title" translatable="yes">Window List</property>
+        <property name="title" translatable="yes">Windows</property>
         <property name="description" translatable="yes">Add exceptions or custom settings for specific apps and windows.</property>
         <child>
           <object class="AdwActionRow" id="self-test-row">
