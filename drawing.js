@@ -35,6 +35,10 @@ const _drawing = class {
     ctx.restore();
   }
 
+  draw_rect(ctx, color, x, y, h_size, v_size, line_width) {
+    this.draw_rounded_rect(ctx, color, x, y, h_size, v_size, line_width, 0);
+  }
+
   draw_rounded_rect(
     ctx,
     color,

@@ -3,19 +3,13 @@ const ExtensionUtils = imports.misc.extensionUtils;
 
 const Me = ExtensionUtils.getCurrentExtension();
 
-const Params = imports.misc.params;
-
-var DEFAULT_FADE_FACTOR = 0.4;
-var VIGNETTE_BRIGHTNESS = 0.5;
-var VIGNETTE_SHARPNESS = 0.7;
-
 const SHADER_PATH = GLib.build_filenamev([
   Me.path,
   'effects',
   'color_effect.glsl',
 ]);
 
-const get_shader_source = (_) => {
+const getShaderSource = (_) => {
   log(Me.path);
   try {
     return Shell.get_file_contents_utf8_sync(SHADER_PATH);
@@ -26,14 +20,12 @@ const get_shader_source = (_) => {
 };
 
 const loadShader = () => {
-  let source = get_shader_source();
+  let source = getShaderSource();
   let [declarations, main] = source.split(/^.*?main\(\s?\)\s?/m);
 
   declarations = declarations.trim();
   main = main.trim().replace(/^[{}]/gm, '').trim();
 
-  // let declarations = VIGNETTE_DECLARATIONS;
-  // let main = VIGNETTE_CODE;
   return { declarations, code: main };
 };
 

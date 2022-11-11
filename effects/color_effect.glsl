@@ -37,6 +37,19 @@ void main() {
         // cogl_color_out = cc
         if (c.r > 0.6 && c.b > 0.6 && c.r - c.g > 0.4) {
           cogl_color_out = cc;
+          return;
         }
+
+    }
+
+    // bottom radius
+    if (
+      (coord.x < frame_rect[0] + pixel_step[1] * 12 * force_scale ||
+        coord.x > frame_rect[2] - pixel_step[1] * 12 * force_scale) &&
+      coord.y > frame_rect[3] - pixel_step[1] * 12 * force_scale) {
+      if (c.r > 0.6 && c.b > 0.6 && c.r - c.g > 0.4) {
+        cc.a = 0;
+        cogl_color_out = cc;
+      }
     }
 }

@@ -100,20 +100,20 @@ var Button = GObject.registerClass(
     }
 
     _get_color() {
-      let clr = this.state.hovered
-        ? this.state.color_hovered
-        : this.state.color;
+      let clr = [
+        ...(this.state.hovered ? this.state.color_hovered : this.state.color),
+      ];
 
       if (this.state.focused) {
         if (!this.state.hovered && !this.state.traffic_light) {
-          clr = this.state.uniform_color;
+          clr = [...this.state.uniform_color];
         }
         if (this.state.hovered && !this.state.hovered_traffic_light) {
-          clr = this.state.hovered_color;
+          clr = [...this.state.hovered_color];
         }
       } else {
         if (!this.state.unfocused_traffic_light) {
-          clr = this.state.unfocused_color;
+          clr = [...this.state.unfocused_color];
         } else {
           clr = combine(clr, [0, 0, 0, 0], 0.8);
         }

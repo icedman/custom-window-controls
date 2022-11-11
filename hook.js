@@ -7,6 +7,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const ColorEffect = Me.imports.effects.color_effect.ColorEffect;
 const Button = Me.imports.button.Button;
+const Chamfer = Me.imports.chamfer.Chamfer;
 const CreateButtonIcon = Me.imports.button.CreateButtonIcon;
 
 const BTN_COUNT = 3;
@@ -65,6 +66,7 @@ var Hook = class {
     this._container.set_track_hover(true);
 
     this._createButtons(true);
+    this._createChamfers(true);
 
     global.display.connectObject(
       'notify::focus-window',
@@ -106,6 +108,7 @@ var Hook = class {
     }
     this._attached = false;
     this._destroyButtons();
+    this._destroyChamfers();
     this._window._parent.remove_child(this._container);
     this._window._parent.remove_child(this._border);
     this._window._parent.disconnectObject(this);
@@ -124,6 +127,7 @@ var Hook = class {
     }
     if (this._button_icons && this._button_icons.length != this._button_count) {
       this._createButtons(true);
+      this._createChamfers(true);
       this._redisplay();
       return;
     }
@@ -131,6 +135,7 @@ var Hook = class {
 
     if (this._container && force) {
       this._createButtons(true);
+      this._createChamfers(true);
       this._redisplay();
       return;
     }
@@ -210,10 +215,7 @@ var Hook = class {
 
     let buffer_rect = this._window.get_buffer_rect();
     let frame_rect = this._window.get_frame_rect();
-    let pixel_step = [
-      1.0 / this._window._parent.actor.width,
-      1.0 / this._window._parent.actor.height,
-    ];
+    let pixel_step = [1.0 / buffer_rect.width, 1.0 / buffer_rect.height];
 
     let x = frame_rect.x - buffer_rect.x;
     let y = frame_rect.y - buffer_rect.y;
@@ -298,9 +300,18 @@ var Hook = class {
         )}px;`;
       }
       this._border.style = style;
+      this._border.visible = true;
+    } else {
+      this._border.visible = false;
     }
 
-    this._border.visible = !this.extension._picking;
+    // position the chamfers
+    if (this._chamfers && this.extension.border_radius) {
+      this._chamfers[0].set_position(
+        x,
+        y + frame_rect.height - this.extension.border_radius * 1.5
+      );
+    }
   }
 
   _onFocusWindow(w, e) {
@@ -316,6 +327,15 @@ var Hook = class {
     children.forEach((c) => {
       this._container.remove_child(c);
     });
+  }
+
+  _destroyChamfers() {
+    if (this._chamfers) {
+      this._chamfers.forEach((c) => {
+        this._window._parent.remove_child(c);
+      });
+      this._chamfers = null;
+    }
   }
 
   _createButtons(recreate) {
@@ -384,5 +404,33 @@ var Hook = class {
         }
         break;
     }
+  }
+
+  _createChamfers(recreate) {
+    /*
+    this._precompute();
+    let scale = this._scale;
+    if (this._chamfers) {
+      if (!recreate) {
+        return;
+      }
+      this._destroyChamfers();
+    }
+    this._chamfers = [];
+    if (this.extension.border_radius) {
+      let c = new Chamfer(this.extension.border_radius*1.5);
+      
+      let bg = (this._window.has_focus()
+        ? this.extension.border_color
+        : this.extension.unfocused_border_color) || [1, 1, 1, 1];
+      
+      c.set_state({
+        color: bg
+      });
+
+      this._window._parent.add_child(c);
+      this._chamfers.push(c);
+    }
+    */
   }
 };
