@@ -57,7 +57,6 @@ var Hook = class {
     this._window._parent.add_child(border);
     this._border = border;
     this._border.set_reactive(false);
-    // this._border.visible = false;
 
     let container = new St.Widget({ name: 'cwc-container' });
     this._window._parent.add_child(container);
@@ -77,18 +76,10 @@ var Hook = class {
 
     window._parent.connectObject('destroy', this.release.bind(this), this);
 
-    this._effect = new ColorEffect({
-      name: 'cwc-color',
-      color: [1.0, 0.0, 1.0, 1.0],
-      x1: 0.0,
-      y1: 0.0,
-      x2: 0.5,
-      y2: 0.5,
-    });
-
     this._deferredShow = true;
     this._container.visible = false;
 
+    this._effect = new ColorEffect();
     window._parent.add_effect_with_name('cwc-color', this._effect);
     window._parent.get_texture().connect('size-changed', () => {
       this._redisplay();
@@ -219,41 +210,65 @@ var Hook = class {
 
     let buffer_rect = this._window.get_buffer_rect();
     let frame_rect = this._window.get_frame_rect();
+    let pixel_step = [
+      1.0 / this._window._parent.actor.width,
+      1.0 / this._window._parent.actor.height,
+    ];
 
     let x = frame_rect.x - buffer_rect.x;
     let y = frame_rect.y - buffer_rect.y;
     let sx = x;
     let sy = y;
 
+    let frame = [
+      x / buffer_rect.width,
+      y / buffer_rect.height,
+      (x + frame_rect.width) / buffer_rect.width,
+      (y + frame_rect.height) / buffer_rect.height,
+    ];
+
+    let ctrl = [0, 0, 0.1, 0.1];
     let offset = [6 * scale, 6 * scale];
 
     this._layout_right = this.extension.layout_right;
+
     if (this.extension.layout_right) {
       cw -= this._button_count * scale;
       sx += frame_rect.width;
       sx -= cw;
       sx -= offset[0] + 4;
-      this._effect.x1 = sx / buffer_rect.width;
-      this._effect.x2 = (sx + cw * 1.2) / buffer_rect.width;
+      ctrl[0] = sx / buffer_rect.width;
+      ctrl[2] = (sx + cw * 1.2) / buffer_rect.width;
       sx += offset[0];
     } else {
       sx += offset[0];
       if (this._window.is_fullscreen()) {
         sx += 2 * scale;
       }
-      this._effect.x1 = sx / buffer_rect.width;
-      this._effect.x2 = (sx + cw * 1.2) / buffer_rect.width;
+      ctrl[0] = sx / buffer_rect.width;
+      ctrl[2] = (sx + cw) / buffer_rect.width;
+
+      sx += 4;
     }
 
     sy += offset[1];
-    this._effect.y1 = sy / buffer_rect.height;
-    this._effect.y2 = (sy + ch * 2) / buffer_rect.height;
+    ctrl[1] = sy / buffer_rect.height;
+    ctrl[3] = (sy + ch) / buffer_rect.height;
+
+    this._effect.control = ctrl;
+    this._effect.frame = frame;
+    this._effect.pixel = pixel_step;
 
     // ... add settings
     // this._effect.focused = this._window.has_focus() ? 0.0 : 0.5;
+    if (this._window.has_focus()) {
+      this.extension._last_focused = this._window;
+      // log(`::${this._window._parent.x} ${frame_rect.x} ${buffer_rect.x}`);
+      // log(frame);
+    }
 
     this._container.set_position(sx, sy);
-    this._container.set_size(cw, ch-4);
+    this._container.set_size(cw, ch - 3);
 
     if (!this._deferredShow) {
       this._container.visible = !this._window.is_fullscreen();
@@ -282,9 +297,10 @@ var Hook = class {
           this.extension.border_radius
         )}px;`;
       }
-      log(style);
       this._border.style = style;
     }
+
+    this._border.visible = !this.extension._picking;
   }
 
   _onFocusWindow(w, e) {

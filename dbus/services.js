@@ -62,6 +62,7 @@ var ApplicationsService = class ApplicationsService {
 
       let actor = target;
       if (type_str.includes('MetaSurfaceActor')) actor = target.get_parent();
+      if (actor.toString().includes('cwc-')) actor = target.get_parent();
 
       if (!actor.toString().includes('WindowActor'))
         return send_picked_signal('window-not-found');

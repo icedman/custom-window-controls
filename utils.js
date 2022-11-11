@@ -1,9 +1,6 @@
 const GLib = imports.gi.GLib;
 const Gdk = imports.gi.Gdk;
 
-// todo.. recompute ... seems to length the debounce hold out period
-const DEBOUNCE_PRECISION = 1;
-
 const dummy_pointer = {
   get_position: () => {
     return [{}, 0, 0];

@@ -1,49 +1,42 @@
 uniform sampler2D tex;
-uniform float red;
-uniform float green;
-uniform float blue;
-uniform float blend;
-uniform float x1;
-uniform float y1;
-uniform float x2;
-uniform float y2;
-uniform float focused;
+
+uniform vec4 control_rect;
+uniform vec4 frame_rect;
+uniform vec2 pixel_step;
 
 void main() {
-    vec4 c = texture2D(tex, cogl_tex_coord_in[0].st);
+    vec2 tcoord = cogl_tex_coord_in[0].st;
+    vec4 c = texture2D(tex, tcoord);
+    cogl_color_out.rgba = c.rgba;
+
+    vec4 cc = texture2D(tex, vec2(
+      frame_rect[0] + pixel_step[0] * 5
+      , tcoord.y));
+
+    float force_scale = 1.0;
+    if (cc.a < 0.5) {
+      // vscode? ... pixel_step should double?
+      cc = texture2D(tex, vec2(
+      (frame_rect[0] + pixel_step[0] * 6) * 2
+      , tcoord.y));
+
+      force_scale = 2.0;
+    }
+
     vec2 coord = cogl_tex_coord_in[0].xy;
+    if (
+      // coord.x > control_rect[0]
+      // && coord.y > control_rect[1]
+      // && coord.x <= control_rect[2] * 2
+      // && coord.y <= control_rect[3] + pixel_step[1] * 4
 
-    vec4 cc = texture2D(tex, vec2(x1, coord.y));
-    vec4 cout = vec4(0.,0.,0.,0.);
-    if (coord.x >= x1 && coord.y >= y1 &&
-        coord.x <= x2 && coord.y <= y2 &&
-        c.r > 0.6 && c.b > 0.6 && c.r - c.g > 0.4
+      (control_rect[0] < 0.5 && coord.x < 0.5 ||
+        control_rect[0] > 0.5 && coord.x > 0.5)
+      && coord.y <= (control_rect[3] + pixel_step[1] * 4) * force_scale
         ) {
-        if (cc.r == 0 && cc.g == 0 && cc.b == 0) {
-            c.a = 0;
+        // cogl_color_out = cc
+        if (c.r > 0.6 && c.b > 0.6 && c.r - c.g > 0.4) {
+          cogl_color_out = cc;
         }
-        cout = vec4(cc.r, cc.g, cc.b, c.a);
-    } else {
-        cout = vec4(c.r, c.g, c.b, c.a);
     }
-
-    // if (coord.x < x1) {
-    //     cout.a = 0.8;
-    // }
-
-    /*
-    // tint the titlebar
-    if ((coord.y <= y2*0.75) && ((c.r < 0.8 && c.g < 0.8 && c.b < 0.8)
-        || c.r > 0.6 && c.b > 0.6 && c.r - c.g > 0.4)) {
-        cout = vec4(cout.r*0.75, cout.g*0.75, cout.b, cout.a);
-    }
-    */
-
-    // darken window
-    if (focused > 0.1 && focused < 0.9) {
-        float dw = 0.85;
-        cout = vec4(cout.r*dw, cout.g*dw, cout.b*dw, cout.a*0.9);
-    }
-
-    cogl_color_out = cout;
 }

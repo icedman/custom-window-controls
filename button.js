@@ -179,9 +179,23 @@ var Button = GObject.registerClass(
       let clr = this._get_color();
       let dark = this._get_dark_color();
 
+      let width2 = width * 1.1;
+      let height2 = height * 1.1;
       Drawing.draw_rounded_rect(
         ctx,
-        clr, //dark,
+        // clr,
+        dark,
+        -width2 / 2,
+        -height2 / 2,
+        width2,
+        height2,
+        0,
+        radius
+      );
+
+      Drawing.draw_rounded_rect(
+        ctx,
+        clr,
         -width / 2,
         -height / 2,
         width,
@@ -189,21 +203,6 @@ var Button = GObject.registerClass(
         0,
         radius
       );
-
-      // width *= 0.8;
-      // height *= 0.8;
-      // Drawing.draw_rounded_rect(
-      //   ctx,
-      //   clr,
-      //   -width / 2,
-      //   -height / 2,
-      //   width,
-      //   height,
-      //   0,
-      //   radius
-      // );
-
-      // Drawing.draw_circle(ctx, clr, 0, 0, width, false);
     }
 
     destroy() {}
