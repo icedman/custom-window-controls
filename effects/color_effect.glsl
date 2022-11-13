@@ -9,23 +9,28 @@ void main() {
     vec4 c = texture2D(tex, tcoord);
     cogl_color_out.rgba = c.rgba;
 
-    vec4 cc = texture2D(tex, vec2(
+    vec2 scoord = vec2(
       frame_rect[0] + pixel_step[0] * 5
-      , tcoord.y));
+      , tcoord.y);
+    vec4 cc = texture2D(tex, scoord);
 
     float force_scale = 1.0;
     if (cc.a < 0.5) {
       // vscode? ... pixel_step should double?
-      cc = texture2D(tex, vec2(
-      (frame_rect[0] + pixel_step[0] * 6) * 2
-      , tcoord.y));
-
+      scoord = vec2(
+        (frame_rect[0] + pixel_step[0] * 6) * 2
+        , tcoord.y);
+      cc = texture2D(tex, scoord);
       force_scale = 2.0;
     }
 
     if (cc.r > 0.6 && cc.b > 0.6 && cc.r - cc.g > 0.4) {
-      // libawaita, window not ready? anything but showing magenta
-      cc.a = 0;
+      scoord.x -= pixel_step[0] * 1.0;
+      cc = texture2D(tex, scoord);
+      if (cc.r > 0.6 && cc.b > 0.6 && cc.r - cc.g > 0.4) {
+        // libawaita, window not ready? anything but showing magenta
+        cc.a = 0;
+      }
     }
 
     vec2 coord = cogl_tex_coord_in[0].xy;
