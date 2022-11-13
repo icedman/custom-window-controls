@@ -23,6 +23,11 @@ void main() {
       force_scale = 2.0;
     }
 
+    if (cc.r > 0.6 && cc.b > 0.6 && cc.r - cc.g > 0.4) {
+      // libawaita, window not ready? anything but showing magenta
+      cc.a = 0;
+    }
+
     vec2 coord = cogl_tex_coord_in[0].xy;
     if (
       // coord.x > control_rect[0]
