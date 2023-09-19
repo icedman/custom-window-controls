@@ -87,19 +87,23 @@ var Hook = class {
       this._redisplay();
 
       // do twice.. for wayland
-      this.extension._hiTimer.runOnce(() => {
-        this._deferredShow = false;
-        this._redisplay();
-      }, 10);
+      if (this.extension._hiTimer) {
+        this.extension._hiTimer.runOnce(() => {
+          this._deferredShow = false;
+          this._redisplay();
+        }, 10);
+      }
     });
 
     this._redisplay();
 
     // ubuntu (gnome 42) .. libadwait seems slow
-    this.extension._hiTimer.runOnce(() => {
-      this._deferredShow = false;
-      this._redisplay();
-    }, 200);
+    if (this.extension._hiTimer) {
+      this.extension._hiTimer.runOnce(() => {
+        this._deferredShow = false;
+        this._redisplay();
+      }, 200);
+    }
   }
 
   release() {
@@ -191,7 +195,7 @@ var Hook = class {
   setActive(t) {
     if (this._container) {
       this._container.style = t ? '' : 'background: rgba(255,255,255,0)';
-      this._container.visible = t;
+      // this._container.visible = t;
       this._effect.enabled = t;
     }
   }

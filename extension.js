@@ -233,7 +233,9 @@ class Extension {
   _setActiveHooks(t) {
     let windows = this._findHookedWindows();
     windows.forEach((w) => {
-      w._hook.setActive(t);
+      if (w._hook) {
+        w._hook.setActive(t);
+      }
     });
   }
 
