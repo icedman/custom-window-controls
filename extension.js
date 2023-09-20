@@ -14,25 +14,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
+ *
  */
 
-/* exported init */
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import Meta from 'gi://Meta';
+import Gio from 'gi://Gio';
 
-const GETTEXT_DOMAIN = 'custom-window-controls';
+import { Timer } from './timer.js';
+import { Hook } from './hook.js';
+import { ApplicationsService } from './dbus/services.js';
 
-const { GObject, St, Meta, Clutter, Gio } = imports.gi;
-
-const ExtensionUtils = imports.misc.extensionUtils;
-const Main = imports.ui.main;
-const Me = ExtensionUtils.getCurrentExtension();
-const { schemaId, settingsKeys, SettingsKeys } = Me.imports.preferences.keys;
-
-const Hook = Me.imports.hook.Hook;
-const Timer = Me.imports.timer.Timer;
-
-const ApplicationsService = Me.imports.dbus.services.ApplicationsService;
-
-const _ = ExtensionUtils.gettext;
+import { schemaId, SettingsKeys } from './preferences/keys.js';
+import { initEffects } from './effects/color_effect.js';
 
 // some codes lifted from dash-to-dock intellihide
 const handledWindowTypes = [
@@ -46,19 +40,19 @@ const handledWindowTypes = [
   // Meta.WindowType.SPLASHSCREEN
 ];
 
-class Extension {
-  constructor(uuid) {
-    this._uuid = uuid;
-    ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
-  }
+import {
+  Extension,
+  gettext as _,
+} from 'resource:///org/gnome/shell/extensions/extension.js';
 
+export default class CustomWindowControlsExt extends Extension {
   enable() {
-    Main._customWindowControls = this;
+    initEffects(this.dir.get_path());
 
     this._hiTimer = new Timer();
-    this._hiTimer.warmup(25);
+    this._hiTimer.initialize(25);
 
-    this.dbus = new ApplicationsService();
+    this.dbus = new ApplicationsService(this.dir.get_path());
     this.dbus.export();
 
     this._gsettings = new Gio.Settings({
@@ -66,10 +60,10 @@ class Extension {
     });
     this._layout = this._gsettings.get_string('button-layout');
 
-    this._settings = ExtensionUtils.getSettings(schemaId);
-    this._settingsKeys = SettingsKeys;
+    this._settings = this.getSettings(schemaId);
+    this._settingsKeys = SettingsKeys();
 
-    SettingsKeys.connectSettings(this._settings, (name, value) => {
+    this._settingsKeys.connectSettings(this._settings, (name, value) => {
       let n = name.replace(/-/g, '_');
       this[n] = value;
 
@@ -95,8 +89,8 @@ class Extension {
 
       this._hookWindows();
     });
-    Object.keys(SettingsKeys._keys).forEach((k) => {
-      let key = SettingsKeys.getKey(k);
+    Object.keys(this._settingsKeys._keys).forEach((k) => {
+      let key = this._settingsKeys.getKey(k);
       let name = k.replace(/-/g, '_');
       this[name] = key.value;
       if (key.options) {
@@ -116,19 +110,19 @@ class Extension {
     this._hiTimer.stop();
     this._hiTimer = null;
 
-    this.dbus.unexport();
-    this.dbus = null;
+    // this.dbus.unexport();
+    // this.dbus = null;
 
     this._gsettings.set_string('button-layout', this._layout || '');
     this._gsettings = null;
 
-    SettingsKeys.disconnectSettings();
+    this._settingsKeys.disconnectSettings();
+    this._settingsKeys = null;
     this._settings = null;
 
     this._removeEvents();
     this._releaseWindows();
   }
-
   _updateButtonLayout() {
     if (this.button_layout != 0) {
       this.layout_right = this.button_layout == 2;
@@ -262,16 +256,4 @@ class Extension {
       }
     });
   }
-
-  // _handleEvent(actor, event) {
-  //   if (event.type() == Clutter.EventType.BUTTON_PRESS ||
-  //       event.type() == Clutter.EventType.TOUCH_BEGIN) {
-  //       log(`${event.type()}`);
-  //   }
-  //   return Clutter.EVENT_PROPAGATE;
-  // }
-}
-
-function init(meta) {
-  return new Extension(meta.uuid);
 }

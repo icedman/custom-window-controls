@@ -2,11 +2,14 @@
 
 'use strict';
 
-const { Gio, GLib } = imports.gi;
-const Main = imports.ui.main;
-const LookingGlass = imports.ui.lookingGlass;
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 
-const Me = imports.misc.extensionUtils.getCurrentExtension();
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import {
+  LookingGlass,
+  Inspector,
+} from 'resource:///org/gnome/shell/ui/lookingGlass.js';
 
 const load_file = (path) => {
   const [, buffer] = GLib.file_get_contents(path);
@@ -15,10 +18,11 @@ const load_file = (path) => {
   return contents;
 };
 
-const iface = load_file(Me.dir.get_path() + '/dbus/iface.xml');
+let iface = {};
 
-var ApplicationsService = class ApplicationsService {
-  constructor() {
+export const ApplicationsService = class {
+  constructor(path) {
+    iface = load_file(path + '/dbus/iface.xml');
     this.DBusImpl = Gio.DBusExportedObject.wrapJSObject(iface, this);
   }
 
@@ -42,12 +46,12 @@ var ApplicationsService = class ApplicationsService {
     // It will restore event handles of window
 
     // open then hide LookingGlass
-    const looking_class = Main.createLookingGlass();
-    looking_class.open();
-    looking_class.hide();
+    const looking_glass = Main.createLookingGlass();
+    looking_glass.open();
+    looking_glass.hide();
 
     // inspect window now
-    const inspector = new LookingGlass.Inspector(Main.createLookingGlass());
+    const inspector = new Inspector(Main.createLookingGlass());
     inspector.connect('target', (me, target, x, y) => {
       // remove border effect when window is picked.
       const effect_name = 'lookingGlass_RedBorderEffect';
@@ -58,14 +62,24 @@ var ApplicationsService = class ApplicationsService {
 
       // get wm_class_instance property of window, then pass it to DBus
       // client
-      const type_str = target.toString();
 
       let actor = target;
-      if (type_str.includes('MetaSurfaceActor')) actor = target.get_parent();
-      if (actor.toString().includes('cwc-')) actor = target.get_parent();
+      while (actor) {
+        if (actor.toString().includes('WindowActor')) {
+          break;
+        }
+        actor = actor.get_parent();
+      }
 
-      if (!actor.toString().includes('WindowActor'))
+      if (!actor) {
         return send_picked_signal('window-not-found');
+      }
+
+      // if (actor.toString().includes('MetaSurfaceActor')) actor = target.get_parent();
+      // if (actor.toString().includes('ContainerActor')) actor = actor.get_parent();
+      // if (actor.toString().includes('cwc-')) actor = actor.get_parent();
+      // if (!actor.toString().includes('WindowActor'))
+      //   return send_picked_signal('window-not-found');
 
       let wm_class_instance = actor.meta_window.get_wm_class_instance();
       let wm_class = actor.meta_window.get_wm_class();
@@ -77,7 +91,7 @@ var ApplicationsService = class ApplicationsService {
     });
 
     // close LookingGlass when we're done
-    inspector.connect('closed', (_) => looking_class.close());
+    inspector.connect('closed', (_) => looking_glass.close());
   }
 
   export() {

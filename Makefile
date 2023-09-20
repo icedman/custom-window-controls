@@ -23,6 +23,9 @@ publish:
 	cp README.md ./build
 	cp -R schemas ./build
 	rm -rf ./*.zip
+	rm ./build/style.js
+	rm ./build/utils.js
+	rm ./build/chamfer.js
 	cd build ; \
 	zip -qr ../custom-window-controls@icedman.github.com.zip .
 
@@ -34,6 +37,13 @@ install-zip: publish
 
 test-prefs:
 	gnome-extensions prefs custom-window-controls@icedman.github.com
+
+test-shell: install
+	env GNOME_SHELL_SLOWDOWN_FACTOR=1 \
+		MUTTER_DEBUG_DUMMY_MODE_SPECS=1280x800 \
+	 	MUTTER_DEBUG_DUMMY_MONITOR_SCALES=1 \
+		dbus-run-session -- gnome-shell --nested --wayland
+	rm /run/user/1000/gnome-shell-disable-extensions
 
 lint:
 	eslint ./

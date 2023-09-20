@@ -2,7 +2,7 @@
 
 'use strict';
 
-const Gio = imports.gi.Gio;
+import Gio from 'gi://Gio';
 
 const bus_name = 'org.gnome.Shell';
 const iface_name = 'github.icedman.customWindowControls';
@@ -10,7 +10,8 @@ const obj_path = '/github/icedman/customWindowControls';
 
 /// Call pick() from the DBus service, it will open the Inspector from
 /// gnome-shell to pick an actor on stage.
-function pick() {
+export const pick = () => {
+  log('pick!');
   Gio.DBus.session.call(
     bus_name,
     obj_path,
@@ -23,11 +24,12 @@ function pick() {
     null,
     null
   );
-}
+};
 
 /// Connect to DBus 'picking' signal, which will be emitted when the inspector
 /// is picking a window.
-function on_picking(cb) {
+export const on_picking = (cb) => {
+  log('picking!');
   const id = Gio.DBus.session.signal_subscribe(
     bus_name,
     iface_name,
@@ -40,11 +42,11 @@ function on_picking(cb) {
       Gio.DBus.session.signal_unsubscribe(id);
     }
   );
-}
+};
 
 /// Connect to DBus 'picked' signal, which will be emitted when a window is
 /// picked.
-function on_picked(cb) {
+export const on_picked = (cb) => {
   const id = Gio.DBus.session.signal_subscribe(
     bus_name,
     iface_name,
@@ -58,4 +60,4 @@ function on_picked(cb) {
       Gio.DBus.session.signal_unsubscribe(id);
     }
   );
-}
+};

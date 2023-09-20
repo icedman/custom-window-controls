@@ -1,7 +1,7 @@
-const Gdk = imports.gi.Gdk;
-const GLib = imports.gi.GLib;
+import Gdk from 'gi://Gdk';
+import GLib from 'gi://GLib';
 
-var PrefKeys = class {
+export let PrefKeys = class {
   constructor() {
     this._keys = {};
   }
@@ -57,6 +57,10 @@ var PrefKeys = class {
         }
         case 'color': {
           settings.set_value(name, new GLib.Variant('(dddd)', value));
+          break;
+        }
+        case 'shortcut': {
+          settings.set_value(name, new GLib.Variant('as', value));
           break;
         }
       }
@@ -148,6 +152,10 @@ var PrefKeys = class {
           }
           break;
         }
+        case 'shortcut': {
+          key.value = settings.get_value(name).deepUnpack();
+          break;
+        }
       }
 
       this._settingsListeners.push(
@@ -184,6 +192,10 @@ var PrefKeys = class {
             }
             case 'string': {
               key.value = settings.get_string(name);
+              break;
+            }
+            case 'shortcut': {
+              key.value = settings.get_value(name).deepUnpack();
               break;
             }
           }

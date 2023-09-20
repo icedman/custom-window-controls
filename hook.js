@@ -1,18 +1,14 @@
 'user strict';
 
-const { St, Shell, Gio, GLib, Gtk, Meta, Clutter } = imports.gi;
-const Main = imports.ui.main;
+import Meta from 'gi://Meta';
+import St from 'gi://St';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const ColorEffect = Me.imports.effects.color_effect.ColorEffect;
-const Button = Me.imports.button.Button;
-const Chamfer = Me.imports.chamfer.Chamfer;
-const CreateButtonIcon = Me.imports.button.CreateButtonIcon;
+import { CreateButtonIcon } from './button.js';
+import { ColorEffect } from './effects/color_effect.js';
 
 const BTN_COUNT = 3;
 
-var Hook = class {
+export const Hook = class {
   _windowSettingFromClass(wm) {
     this._button_count = BTN_COUNT;
 
@@ -83,17 +79,21 @@ var Hook = class {
 
     this._effect = new ColorEffect();
     window._parent.add_effect_with_name('cwc-color', this._effect);
-    window._parent.get_texture().connect('size-changed', () => {
-      this._redisplay();
 
-      // do twice.. for wayland
-      if (this.extension._hiTimer) {
-        this.extension._hiTimer.runOnce(() => {
-          this._deferredShow = false;
-          this._redisplay();
-        }, 10);
-      }
-    });
+    this.extension._hiTimer.runOnce(() => {
+      if (!window._parent.get_texture()) return;
+      window._parent.get_texture().connect('size-changed', () => {
+        this._redisplay();
+
+        // do twice.. for wayland
+        if (this.extension._hiTimer) {
+          this.extension._hiTimer.runOnce(() => {
+            this._deferredShow = false;
+            this._redisplay();
+          }, 10);
+        }
+      });
+    }, 50);
 
     this._redisplay();
 

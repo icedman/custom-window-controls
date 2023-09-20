@@ -1,9 +1,9 @@
-const { Clutter, GObject, GLib, PangoCairo, Pango, St } = imports.gi;
-const Cairo = imports.cairo;
+import GObject from 'gi://GObject';
+import Clutter from 'gi://Clutter';
+import St from 'gi://St';
+import Cairo from 'gi://cairo';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const Drawing = Me.imports.drawing.Drawing;
+import { Drawing } from './drawing.js';
 
 let size = 400;
 
@@ -15,7 +15,7 @@ function combine(a, b, r) {
   return c;
 }
 
-var Button = GObject.registerClass(
+export const Button = GObject.registerClass(
   {
     Properties: {},
     Signals: {},
@@ -23,6 +23,8 @@ var Button = GObject.registerClass(
   class Button extends Clutter.Actor {
     _init(sz) {
       super._init();
+
+      this.drawing = new Drawing();
 
       if (sz) size = sz;
 
@@ -162,8 +164,8 @@ var Button = GObject.registerClass(
     _draw_circle_button(ctx, width, height) {
       let clr = this._get_color();
       let dark = this._get_dark_color();
-      Drawing.draw_circle(ctx, dark, 0, 0, width, false);
-      Drawing.draw_circle(ctx, clr, 0, 0, width * 0.8, false);
+      this.drawing.draw_circle(ctx, dark, 0, 0, width, false);
+      this.drawing.draw_circle(ctx, clr, 0, 0, width * 0.8, false);
     }
 
     _draw_diamond_button(ctx, width, height) {
@@ -185,7 +187,7 @@ var Button = GObject.registerClass(
 
       let width2 = width * 1.1;
       let height2 = height * 1.1;
-      Drawing.draw_rounded_rect(
+      this.drawing.draw_rounded_rect(
         ctx,
         // clr,
         dark,
@@ -197,7 +199,7 @@ var Button = GObject.registerClass(
         radius
       );
 
-      Drawing.draw_rounded_rect(
+      this.drawing.draw_rounded_rect(
         ctx,
         clr,
         -width / 2,
@@ -216,7 +218,15 @@ var Button = GObject.registerClass(
 // FF574F
 // C19A32
 // 2AD043
-var CreateButtonIcon = (idx, sz, sx, sy, container, onClick, settings) => {
+export const CreateButtonIcon = (
+  idx,
+  sz,
+  sx,
+  sy,
+  container,
+  onClick,
+  settings
+) => {
   let styles = [
     {
       color: [255 / 255, 87 / 255, 79 / 255, 1],

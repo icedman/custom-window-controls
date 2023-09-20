@@ -1,16 +1,16 @@
-const { St, Shell, GObject, Gio, GLib, Gtk, Meta, Clutter } = imports.gi;
-const ExtensionUtils = imports.misc.extensionUtils;
+import Shell from 'gi://Shell';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
 
-const Me = ExtensionUtils.getCurrentExtension();
-
-const SHADER_PATH = GLib.build_filenamev([
-  Me.path,
-  'effects',
-  'color_effect.glsl',
-]);
+let extensionDir = '';
 
 const getShaderSource = (_) => {
-  log(Me.path);
+  const SHADER_PATH = GLib.build_filenamev([
+    extensionDir,
+    'effects',
+    'color_effect.glsl',
+  ]);
+
   try {
     return Shell.get_file_contents_utf8_sync(SHADER_PATH);
   } catch (e) {
@@ -19,19 +19,27 @@ const getShaderSource = (_) => {
   }
 };
 
-const loadShader = () => {
-  let source = getShaderSource();
-  let [declarations, main] = source.split(/^.*?main\(\s?\)\s?/m);
+let declarations = null;
+let code = null;
 
-  declarations = declarations.trim();
+const loadShader = () => {
+  let source = getShaderSource() || '';
+  let [decl, main] = source.split(/^.*?main\(\s?\)\s?/m);
+
+  decl = decl.trim();
   main = main.trim().replace(/^[{}]/gm, '').trim();
 
-  return { declarations, code: main };
+  declarations = decl;
+  code = main;
+  // return { declarations, code: main };
 };
 
-let { declarations, code } = loadShader();
+export const initEffects = (path) => {
+  extensionDir = path;
+  loadShader();
+};
 
-var ColorEffect = GObject.registerClass(
+export const ColorEffect = GObject.registerClass(
   {},
   class ColorEffect extends Shell.GLSLEffect {
     _init(params) {

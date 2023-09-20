@@ -1,9 +1,9 @@
 {
   "name": "Custom Window Controls",
-  "description": "Theme the window control buttons.",
+  "description": "Theme the window control buttons. (Warning: Highly Experimental)",
   "uuid": "custom-window-controls@icedman.github.com",
   "shell-version": [
-    "42", "43"
+    "45"
   ],
   "url": "https://github.com/icedman/custom-window-controls",
   "uuid": "custom-window-controls@icedman.github.com",
