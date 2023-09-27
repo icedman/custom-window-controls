@@ -47,6 +47,10 @@ export let SettingsKeys = function () {
       widget_type: 'dropdown',
       options: ['circle', 'square', 'dash', 'vertical', 'slash', 'back_slash'],
     },
+    'enable-button-skin': {
+      default_value: true,
+      widget_type: 'switch',
+    },
     'traffic-light-colors': {
       default_value: true,
       widget_type: 'switch',

@@ -85,6 +85,12 @@ export default class CustomWindowControlsExt extends Extension {
           this._updateButtonLayout();
           this._hookWindows(true);
           break;
+        case 'enable-button-skin':
+          this._releaseWindows();
+          if (value) {
+            this._hookWindows(true);
+          }
+          break;
       }
 
       this._hookWindows();
@@ -110,8 +116,8 @@ export default class CustomWindowControlsExt extends Extension {
     this._hiTimer.stop();
     this._hiTimer = null;
 
-    // this.dbus.unexport();
-    // this.dbus = null;
+    this.dbus.unexport();
+    this.dbus = null;
 
     this._gsettings.set_string('button-layout', this._layout || '');
     this._gsettings = null;
@@ -122,6 +128,8 @@ export default class CustomWindowControlsExt extends Extension {
 
     this._removeEvents();
     this._releaseWindows();
+
+    this.button_style = null;
   }
   _updateButtonLayout() {
     if (this.button_layout != 0) {
@@ -202,6 +210,8 @@ export default class CustomWindowControlsExt extends Extension {
   _removeEvents() {
     global.stage.disconnectObject(this);
     global.display.disconnectObject(this);
+    Main.overview.disconnectObject(this);
+    Main.layoutManager.disconnectObject(this);
   }
 
   _findWindows() {
@@ -234,6 +244,9 @@ export default class CustomWindowControlsExt extends Extension {
   }
 
   _hookWindows(force) {
+    if (!this.enable_button_skin) {
+      return;
+    }
     this._windows = this._findWindows();
     this._windows.forEach((w) => {
       if (!w._hook) {
@@ -255,5 +268,6 @@ export default class CustomWindowControlsExt extends Extension {
         delete w._hook;
       }
     });
+    this._windows = null;
   }
 }

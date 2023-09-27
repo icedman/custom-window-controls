@@ -2,6 +2,7 @@
 
 'use strict';
 
+import Shell from 'gi://Shell';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
@@ -12,10 +13,18 @@ import {
 } from 'resource:///org/gnome/shell/ui/lookingGlass.js';
 
 const load_file = (path) => {
-  const [, buffer] = GLib.file_get_contents(path);
-  const contents = imports.byteArray.toString(buffer);
-  GLib.free(buffer);
-  return contents;
+  // const [, buffer] = GLib.file_get_contents(path);
+  // const contents = imports.byteArray.toString(buffer);
+  // GLib.free(buffer);
+  // return contents;
+
+  try {
+    console.log(path);
+    return Shell.get_file_contents_utf8_sync(path);
+  } catch (e) {
+    console.log(`error loading file from ${path}: ${e}`);
+    return null;
+  }
 };
 
 let iface = {};
@@ -23,6 +32,7 @@ let iface = {};
 export const ApplicationsService = class {
   constructor(path) {
     iface = load_file(path + '/dbus/iface.xml');
+    console.log(iface);
     this.DBusImpl = Gio.DBusExportedObject.wrapJSObject(iface, this);
   }
 
@@ -97,7 +107,7 @@ export const ApplicationsService = class {
   export() {
     this.DBusImpl.export(
       Gio.DBus.session,
-      '/github/icedman/customWindowControls'
+      '/gnome/extensions/icedman/customWindowControls'
     );
   }
 

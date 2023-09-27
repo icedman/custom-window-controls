@@ -47,7 +47,7 @@ export const Hook = class {
     if (this._windowSettingFromClass(this._wm)) {
       return;
     }
-
+    
     this._attached = true;
 
     let border = new St.Widget({ name: 'cwc-border' });
@@ -269,8 +269,8 @@ export const Hook = class {
     // this._effect.focused = this._window.has_focus() ? 0.0 : 0.5;
     if (this._window.has_focus()) {
       this.extension._last_focused = this._window;
-      // log(`::${this._window._parent.x} ${frame_rect.x} ${buffer_rect.x}`);
-      // log(frame);
+      // console.log(`::${this._window._parent.x} ${frame_rect.x} ${buffer_rect.x}`);
+      // console.log(frame);
     }
 
     this._container.set_position(sx, sy);

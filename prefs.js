@@ -21,32 +21,33 @@ export default class Preferences extends ExtensionPreferences {
   constructor(metadata) {
     super(metadata);
     let iconTheme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
-    this.UIFolderPath = `${this.dir.get_path()}/ui`;
+    this.UIFolderPath = `${this.path}/ui`;
     iconTheme.add_search_path(`${this.UIFolderPath}/icons`);
     // ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
   }
 
   _do_pick_window(builder, settings, remove_if_failed = false) {
-    log('pick a window');
+    console.log('pick a window');
     // a mechanism to know if the extension is listening correcly
     let has_responded = false;
     let should_take_answer = true;
-    setTimeout((_) => {
-      if (!has_responded) {
-        log('picking failed!');
-      }
-    }, 15);
+
+    // setTimeout((_) => {
+    //   if (!has_responded) {
+    //     console.log('picking failed!');
+    //   }
+    // }, 15);
 
     on_picking((_) => (has_responded = true));
 
     on_picked((wm_class) => {
       if (should_take_answer) {
         if (wm_class == 'window-not-found' || !wm_class) {
-          log('not found');
+          console.log('not found');
           return;
         }
         if (this.windowListContains(settings, { wm_class })) {
-          log('already exists');
+          console.log('already exists');
           return;
         }
         let window_group = builder.get_object('windows-group');
@@ -104,7 +105,7 @@ export default class Preferences extends ExtensionPreferences {
   }
 
   addToWindowList(placeholder, settings, data) {
-    log('add');
+    console.log('add');
     let obj = this.extractWindowList(settings);
     let existing = false;
     obj.forEach((item) => {
@@ -118,13 +119,13 @@ export default class Preferences extends ExtensionPreferences {
     if (!existing) {
       obj.push(data);
     }
-    log(obj);
+    console.log(obj);
     settings.set_string(WINDOW_LIST_ID, JSON.stringify(obj));
     return true;
   }
 
   removeFromWindowList(placeholder, settings, data) {
-    log('remove');
+    console.log('remove');
     let obj = this.extractWindowList(settings);
     obj = obj.filter((i) => {
       return i.wm_class != data.wm_class;
@@ -187,17 +188,51 @@ export default class Preferences extends ExtensionPreferences {
     }
   }
 
-  addMenu(window, builder) {
-    let menu_util = builder.get_object('menu_util');
-    window.add(menu_util);
+  find(n, name) {
+    if (n.get_name() == name) {
+      return n;
+    }
+    let c = n.get_first_child();
+    while (c) {
+      let cn = this.find(c, name);
+      if (cn) {
+        return cn;
+      }
+      c = c.get_next_sibling();
+    }
+    return null;
+  }
 
-    const page = builder.get_object('menu_util');
-    const pages_stack = page.get_parent(); // AdwViewStack
-    const content_stack = pages_stack.get_parent().get_parent(); // GtkStack
-    const preferences = content_stack.get_parent(); // GtkBox
-    const headerbar = preferences.get_first_child(); // AdwHeaderBar
+  dump(n, l) {
+    let s = '';
+    for (let i = 0; i < l; i++) {
+      s += ' ';
+    }
+    print(`${s}${n.get_name()}`);
+    let c = n.get_first_child();
+    while (c) {
+      this.dump(c, l + 1);
+      c = c.get_next_sibling();
+    }
+  }
+
+  addMenu(window, builder) {
+    // let menu_util = builder.get_object('menu_util');
+    // window.add(menu_util);
+
+    // const page = builder.get_object('menu_util');
+    // const pages_stack = page.get_parent(); // AdwViewStack
+    // const content_stack = pages_stack.get_parent().get_parent(); // GtkStack
+    // const preferences = content_stack.get_parent(); // GtkBox
+    // const headerbar = preferences.get_first_child(); // AdwHeaderBar
     // headerbar.pack_start(builder.get_object('info_menu'));
 
+    let headerbar = this.find(window, 'AdwHeaderBar');
+    if (!headerbar) {
+      return;
+    }
+    headerbar.pack_start(builder.get_object('info_menu'));
+    
     // setup menu actions
     const actionGroup = new Gio.SimpleActionGroup();
     window.insert_action_group('prefs', actionGroup);
@@ -226,7 +261,7 @@ export default class Preferences extends ExtensionPreferences {
       actionGroup.add_action(act);
     });
 
-    window.remove(menu_util);
+    // window.remove(menu_util);
   }
 
   fillPreferencesWindow(window) {

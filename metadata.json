@@ -6,8 +6,7 @@
     "45"
   ],
   "url": "https://github.com/icedman/custom-window-controls",
-  "uuid": "custom-window-controls@icedman.github.com",
   "schema-id": "org.gnome.shell.extensions.custom-window-controls",
   "gettext-domain": "custom-window-controls",
-  "version": 1
+  "version": 3
 }

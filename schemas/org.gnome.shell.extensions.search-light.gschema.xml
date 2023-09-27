@@ -11,6 +11,11 @@
         <summary>Button color</summary>
         <description>Set button color.</description>
     </key>
+    <key type="b" name="enable-button-skin">
+        <default>true</default>
+        <summary>Enable button skin</summary>
+        <description>Enable window control button skin.</description>
+    </key>
     <key type="b" name="hovered-traffic-light-colors">
         <default>true</default>
         <summary>Hovered: Traffic light color</summary>

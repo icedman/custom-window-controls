@@ -147,6 +147,34 @@ let prefKeys = new PrefKeys();
 //   },
 // });
 
+function find(n, name) {
+  if (n.get_name() == name) {
+    return n;
+  }
+  let c = n.get_first_child();
+  while (c) {
+    let cn = this.find(c, name);
+    if (cn) {
+      return cn;
+    }
+    c = c.get_next_sibling();
+  }
+  return null;
+}
+
+function dump(n, l) {
+  let s = '';
+  for (let i = 0; i < l; i++) {
+    s += ' ';
+  }
+  print(`${s}${n.get_name()}`);
+  let c = n.get_first_child();
+  while (c) {
+    this.dump(c, l + 1);
+    c = c.get_next_sibling();
+  }
+}
+
 function add_window_row(placeholder) {
   let builder = new Gtk.Builder();
   builder.add_from_file(`ui/window-row.ui`);
@@ -199,11 +227,17 @@ app.connect('activate', (me) => {
   w.add(menu_util);
   w.title = 'Custom Window Controls';
 
-  const page = builder.get_object('menu_util');
-  const pages_stack = page.get_parent(); // AdwViewStack
-  const content_stack = pages_stack.get_parent().get_parent(); // GtkStack
-  const preferences = content_stack.get_parent(); // GtkBox
-  const headerbar = preferences.get_first_child(); // AdwHeaderBar
+  // const page = builder.get_object('menu_util');
+  // const pages_stack = page.get_parent(); // AdwViewStack
+  // const content_stack = pages_stack.get_parent().get_parent(); // GtkStack
+  // const preferences = content_stack.get_parent(); // GtkBox
+  // const headerbar = preferences.get_first_child(); // AdwHeaderBar
+  // headerbar.pack_start(builder.get_object('info_menu'));
+
+  let headerbar = find(w, 'AdwHeaderBar');
+  if (!headerbar) {
+    return;
+  }
   headerbar.pack_start(builder.get_object('info_menu'));
 
   // setup menu actions

@@ -14,7 +14,7 @@ const getShaderSource = (_) => {
   try {
     return Shell.get_file_contents_utf8_sync(SHADER_PATH);
   } catch (e) {
-    log(`[d2dl] error loading shader from ${SHADER_PATH}: ${e}`);
+    console.log(`error loading shader from ${SHADER_PATH}: ${e}`);
     return null;
   }
 };
