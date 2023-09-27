@@ -13,6 +13,4 @@ make
 This is highly experimental. A set of buttons is drawn over the existing ones.
 For a purely css solution (Gtk3 & Gtk4 apps only though) see these files:
 
-```sh
 [https://github.com/icedman/gnome-shell-hammer/tree/master/window-theme](https://github.com/icedman/gnome-shell-hammer/tree/master/window-theme)
-```
