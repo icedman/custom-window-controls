@@ -19,8 +19,10 @@
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import Meta from 'gi://Meta';
+import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 
+import { Style } from './style.js';
 import { Timer } from './timer.js';
 import { Hook } from './hook.js';
 import { ApplicationsService } from './dbus/services.js';
@@ -48,6 +50,9 @@ import {
 export default class CustomWindowControlsExt extends Extension {
   enable() {
     initEffects(this.dir.get_path());
+
+
+    this._style = new Style();
 
     this._hiTimer = new Timer();
     this._hiTimer.initialize(25);
@@ -113,6 +118,8 @@ export default class CustomWindowControlsExt extends Extension {
   }
 
   disable() {
+    this._style = null;
+
     this._hiTimer.stop();
     this._hiTimer = null;
 
@@ -131,6 +138,7 @@ export default class CustomWindowControlsExt extends Extension {
 
     this.button_style = null;
   }
+
   _updateButtonLayout() {
     if (this.button_layout != 0) {
       this.layout_right = this.button_layout == 2;
@@ -145,9 +153,117 @@ export default class CustomWindowControlsExt extends Extension {
     );
   }
 
+  _readFile(filename) {
+    let input_file = Gio.file_new_for_path(filename);
+    let size = input_file
+      .query_info('standard::size', Gio.FileQueryInfoFlags.NONE, null)
+      .get_size();
+    let stream = input_file.open_readwrite(null).get_input_stream();
+    let data = stream.read_bytes(size, null).get_data();
+    stream.close(null);
+    return data;
+  }
+
+  _writeFile(filename, content) {
+    let fn = Gio.File.new_for_path(filename);
+    const [, etag] = fn.replace_contents(
+      content,
+      null,
+      false,
+      Gio.FileCreateFlags.REPLACE_DESTINATION,
+      null
+    );
+  }
+
   _updateButtonStyle() {
     this.button_style =
       this.control_button_style_options[this.control_button_style] || 'circle';
+
+    // make dirs
+    try {
+      Gio.File.new_for_path('.config/gtk-3.0').make_directory_with_parents(
+        null
+      );
+    } catch (err) {
+      //
+    }
+    try {
+      Gio.File.new_for_path('.config/gtk-4.0').make_directory_with_parents(
+        null
+      );
+    } catch (err) {
+      //
+    }
+
+    {
+      let gtk3css = this._readFile(
+        `${this.dir.get_path()}/ui/window-theme/gtk-3.0/gtk.css`
+      );
+      this._writeFile(`.config/gtk-3.0/gtk.css`, gtk3css);
+      let gtk4css = this._readFile(
+        `${this.dir.get_path()}/ui/window-theme/gtk-4.0/gtk.css`
+      );
+      this._writeFile(`.config/gtk-4.0/gtk.css`, gtk4css);
+    }
+
+    // ['circle', 'square', 'dash', 'vertical', 'slash', 'back_slash']
+    let styles = ['dot', 'sq', 'rr', 'rr90', 'rr135', 'rr45'];
+    let style = styles[this.control_button_style] || 'dot';
+
+    let dot = String(
+      this._readFile(`${this.dir.get_path()}/ui/window-theme/${style}.svg`)
+    );
+    let doth = String(
+      this._readFile(`${this.dir.get_path()}/ui/window-theme/${style}h.svg`)
+    );
+
+    ['gtk-4.0', 'gtk-3.0'].forEach((gtk) => {
+      let maxcolor = `rgba(0,250,0)`;
+      let maxcolorh = `rgba(0,250,0)`;
+      let mincolor = `rgba(255,245,0)`;
+      let mincolorh = `rgba(255,245,0)`;
+      let closecolor = `rgba(255,0,0)`;
+      let closecolorh = `rgba(255,0,0)`;
+
+      if (!this.traffic_light_colors) {
+        maxcolor = `rgba(${this._style.rgba(this.button_color)})`;
+        mincolor = `rgba(${this._style.rgba(this.button_color)})`;
+        closecolor = `rgba(${this._style.rgba(this.button_color)})`;
+      }
+
+      if (!this.hovered_traffic_light_colors) {
+        maxcolorh = `rgba(${this._style.rgba(this.hovered_button_color)})`;
+        mincolorh = `rgba(${this._style.rgba(this.hovered_button_color)})`;
+        closecolorh = `rgba(${this._style.rgba(this.hovered_button_color)})`;
+      }
+
+      // max
+      {
+        let dotcolored = dot.replace('fill="#ffffff"', `fill="${maxcolor}"`);
+        let dotcoloredh = doth.replace('fill="#ffffff"', `fill="${maxcolorh}"`);
+        this._writeFile(`.config/${gtk}/max.svg`, dotcolored);
+        this._writeFile(`.config/${gtk}/maxh.svg`, dotcoloredh);
+      }
+
+      // min
+      {
+        let dotcolored = dot.replace('fill="#ffffff"', `fill="${mincolor}"`);
+        let dotcoloredh = doth.replace('fill="#ffffff"', `fill="${mincolorh}"`);
+        this._writeFile(`.config/${gtk}/min.svg`, dotcolored);
+        this._writeFile(`.config/${gtk}/minh.svg`, dotcoloredh);
+      }
+
+      // close
+      {
+        let dotcolored = dot.replace('fill="#ffffff"', `fill="${closecolor}"`);
+        let dotcoloredh = doth.replace(
+          'fill="#ffffff"',
+          `fill="${closecolorh}"`
+        );
+        this._writeFile(`.config/${gtk}/close.svg`, dotcolored);
+        this._writeFile(`.config/${gtk}/closeh.svg`, dotcoloredh);
+      }
+    });
   }
 
   _addEvents() {
@@ -244,30 +360,30 @@ export default class CustomWindowControlsExt extends Extension {
   }
 
   _hookWindows(force) {
-    if (!this.enable_button_skin) {
-      return;
-    }
-    this._windows = this._findWindows();
-    this._windows.forEach((w) => {
-      if (!w._hook) {
-        w._hook = new Hook();
-        w._hook.extension = this;
-        w._hook.attach(w);
-      } else {
-        w._hook.update(force);
-      }
-    });
+    // if (!this.enable_button_skin) {
+    //   return;
+    // }
+    // this._windows = this._findWindows();
+    // this._windows.forEach((w) => {
+    //   if (!w._hook) {
+    //     w._hook = new Hook();
+    //     w._hook.extension = this;
+    //     w._hook.attach(w);
+    //   } else {
+    //     w._hook.update(force);
+    //   }
+    // });
   }
 
   _releaseWindows() {
-    this._windows = this._findWindows();
-    this._windows.forEach((w) => {
-      if (w._hook) {
-        w._hook.release();
-        w._hook = null;
-        delete w._hook;
-      }
-    });
-    this._windows = null;
+    // this._windows = this._findWindows();
+    // this._windows.forEach((w) => {
+    //   if (w._hook) {
+    //     w._hook.release();
+    //     w._hook = null;
+    //     delete w._hook;
+    //   }
+    // });
+    // this._windows = null;
   }
 }

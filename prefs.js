@@ -232,7 +232,7 @@ export default class Preferences extends ExtensionPreferences {
       return;
     }
     headerbar.pack_start(builder.get_object('info_menu'));
-    
+
     // setup menu actions
     const actionGroup = new Gio.SimpleActionGroup();
     window.insert_action_group('prefs', actionGroup);

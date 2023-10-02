@@ -47,7 +47,7 @@ export const Hook = class {
     if (this._windowSettingFromClass(this._wm)) {
       return;
     }
-    
+
     this._attached = true;
 
     let border = new St.Widget({ name: 'cwc-border' });
