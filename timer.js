@@ -185,7 +185,7 @@ export let Timer = class {
       this.start(this._resolution);
     }
 
-    // log(`subscribers: ${this.subscriberNames().join(',')}`);
+    // console.log(`subscribers: ${this.subscriberNames().join(',')}`);
     return obj;
   }
 

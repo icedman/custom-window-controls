@@ -262,16 +262,18 @@ export default class Preferences extends ExtensionPreferences {
     });
 
     // window.remove(menu_util);
+
+    // this.dump(window, 0);
   }
 
   fillPreferencesWindow(window) {
     let builder = new Gtk.Builder();
 
-    builder.add_from_file(`${this.UIFolderPath}/general.ui`);
+    // builder.add_from_file(`${this.UIFolderPath}/general.ui`);
     builder.add_from_file(`${this.UIFolderPath}/appearance.ui`);
     builder.add_from_file(`${this.UIFolderPath}/menu.ui`);
     window.add(builder.get_object('appearance'));
-    window.add(builder.get_object('general'));
+    // window.add(builder.get_object('general'));
     window.set_search_enabled(true);
 
     let settings = this.getSettings(schemaId);
@@ -279,9 +281,9 @@ export default class Preferences extends ExtensionPreferences {
     settingsKeys.connectBuilder(builder);
     settingsKeys.connectSettings(settings);
 
-    this.addButtonEvents(window, builder, settings);
+    // this.addButtonEvents(window, builder, settings);
     this.addMenu(window, builder);
 
-    this.loadWindowList(builder, settings);
+    // this.loadWindowList(builder, settings);
   }
 }

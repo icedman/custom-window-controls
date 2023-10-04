@@ -51,7 +51,6 @@ export default class CustomWindowControlsExt extends Extension {
   enable() {
     initEffects(this.dir.get_path());
 
-
     this._style = new Style();
 
     this._hiTimer = new Timer();
@@ -220,10 +219,13 @@ export default class CustomWindowControlsExt extends Extension {
     ['gtk-4.0', 'gtk-3.0'].forEach((gtk) => {
       let maxcolor = `rgba(0,250,0)`;
       let maxcolorh = `rgba(0,250,0)`;
+      let maxcolorb = `rgba(0,250,0)`;
       let mincolor = `rgba(255,245,0)`;
       let mincolorh = `rgba(255,245,0)`;
+      let mincolorb = `rgba(255,245,0)`;
       let closecolor = `rgba(255,0,0)`;
       let closecolorh = `rgba(255,0,0)`;
+      let closecolorb = `rgba(255,0,0)`;
 
       if (!this.traffic_light_colors) {
         maxcolor = `rgba(${this._style.rgba(this.button_color)})`;
@@ -237,20 +239,30 @@ export default class CustomWindowControlsExt extends Extension {
         closecolorh = `rgba(${this._style.rgba(this.hovered_button_color)})`;
       }
 
+      if (!this.unfocused_traffic_light_colors) {
+        maxcolorb = `rgba(${this._style.rgba(this.unfocused_button_color)})`;
+        mincolorb = `rgba(${this._style.rgba(this.unfocused_button_color)})`;
+        closecolorb = `rgba(${this._style.rgba(this.unfocused_button_color)})`;
+      }
+
       // max
       {
         let dotcolored = dot.replace('fill="#ffffff"', `fill="${maxcolor}"`);
         let dotcoloredh = doth.replace('fill="#ffffff"', `fill="${maxcolorh}"`);
+        let dotcoloredb = doth.replace('fill="#ffffff"', `fill="${maxcolorb}"`);
         this._writeFile(`.config/${gtk}/max.svg`, dotcolored);
         this._writeFile(`.config/${gtk}/maxh.svg`, dotcoloredh);
+        this._writeFile(`.config/${gtk}/maxb.svg`, dotcoloredb);
       }
 
       // min
       {
         let dotcolored = dot.replace('fill="#ffffff"', `fill="${mincolor}"`);
         let dotcoloredh = doth.replace('fill="#ffffff"', `fill="${mincolorh}"`);
+        let dotcoloredb = doth.replace('fill="#ffffff"', `fill="${mincolorb}"`);
         this._writeFile(`.config/${gtk}/min.svg`, dotcolored);
         this._writeFile(`.config/${gtk}/minh.svg`, dotcoloredh);
+        this._writeFile(`.config/${gtk}/minb.svg`, dotcoloredb);
       }
 
       // close
@@ -260,8 +272,13 @@ export default class CustomWindowControlsExt extends Extension {
           'fill="#ffffff"',
           `fill="${closecolorh}"`
         );
+        let dotcoloredb = doth.replace(
+          'fill="#ffffff"',
+          `fill="${closecolorb}"`
+        );
         this._writeFile(`.config/${gtk}/close.svg`, dotcolored);
         this._writeFile(`.config/${gtk}/closeh.svg`, dotcoloredh);
+        this._writeFile(`.config/${gtk}/closeb.svg`, dotcoloredb);
       }
     });
   }

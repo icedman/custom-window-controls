@@ -53,3 +53,17 @@ button.close:hover {
   background-image: url('closeh.svg');
   opacity: 1;
 }
+
+:backdrop > button.maximize {
+  background-image: url('maxb.svg');
+  opacity: 1;
+}
+:backdrop > button.minimize {
+  background-image: url('minb.svg');
+  opacity: 1;
+}
+
+:backdrop > button.close {
+  background-image: url('closeb.svg');
+  opacity: 1;
+}
