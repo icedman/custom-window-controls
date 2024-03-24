@@ -110,8 +110,8 @@ export default class CustomWindowControlsExt extends Extension {
     this._hiTimer.stop();
     this._hiTimer = null;
 
-    // this.dbus.unexport();
-    // this.dbus = null;
+    this.dbus.unexport();
+    this.dbus = null;
 
     this._gsettings.set_string('button-layout', this._layout || '');
     this._gsettings = null;

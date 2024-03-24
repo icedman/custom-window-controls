@@ -7,6 +7,10 @@ build:
 
 install:
 	mkdir -p ~/.local/share/gnome-shell/extensions/custom-window-controls@icedman.github.com/
+	rm -rf ~/.local/share/gnome-shell/extensions/custom-window-controls@icedman.github.com/effects/*.js
+	rm -rf ~/.local/share/gnome-shell/extensions/custom-window-controls@icedman.github.com/preferences/*.js
+	rm -rf ~/.local/share/gnome-shell/extensions/custom-window-controls@icedman.github.com/tests/*.js
+	rm -rf ~/.local/share/gnome-shell/extensions/custom-window-controls@icedman.github.com/*.js
 	cp -R ./* ~/.local/share/gnome-shell/extensions/custom-window-controls@icedman.github.com/
 
 publish:
