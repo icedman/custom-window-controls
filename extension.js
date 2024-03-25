@@ -47,6 +47,8 @@ import {
 
 export default class CustomWindowControlsExt extends Extension {
   enable() {
+    Main.overview.cwc = this;
+    
     initEffects(this.dir.get_path());
 
     this._hiTimer = new Timer();
